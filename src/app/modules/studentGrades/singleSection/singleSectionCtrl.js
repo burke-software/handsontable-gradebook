@@ -5,11 +5,12 @@ angular.module('gradeBookApp.controllers')
     '$scope',
     'classSectionFactory',
     'assignmentFactory',
+    'gradeFactory',
     'studentFactory',
     '$routeParams',
     '$modal',
     '$log',
-    function ($scope, classSectionFactory,assignmentFactory,studentFactory, $routeParams, $modal, $log) {
+    function ($scope, classSectionFactory, assignmentFactory, gradeFactory, studentFactory, $routeParams, $modal, $log) {
       $scope.sectionId = $routeParams.sectionId;
 
       if (!$scope.sectionId) {
@@ -30,14 +31,23 @@ angular.module('gradeBookApp.controllers')
       $scope.afterGetColHeader = function (col, TH) {
         // FOR FINAL GRADE COL HEADER
         if (col === 2) {
-          var button = buildButton();
-          Handsontable.Dom.addEvent(button,'click', function (e){
+          var adjustButton = buildButton('glyphicon-wrench');
+          Handsontable.Dom.addEvent(adjustButton,'click', function (e){
             adjustGradeSettings();
           });
-          TH.firstChild.appendChild(button);
+          TH.firstChild.appendChild(adjustButton);
         }
 
+        if (col === _assignmentArray.length + staticColHeadersCount) {
+          var addButton = buildButton('glyphicon-plus');
+          Handsontable.Dom.addEvent(addButton,'click', function (e){
+            addNewAssignment();
+          });
+          TH.firstChild.appendChild(addButton);
+        }
       };
+
+      var staticColHeadersCount = 3; //firstName, lastName, finalGrade
 
       var adjustGradeSettings = function () {
         console.log('adjustGradeSettings');
@@ -50,14 +60,46 @@ angular.module('gradeBookApp.controllers')
               return $scope.originalDataSource.assignments;
             }
           }
-        })
-
-
+        });
       };
 
-      var buildButton = function () {
+      var addNewAssignment = function () {
+        console.log('addNewAssignment');
+
+        var modalInstance = $modal.open({
+          templateUrl:'studentGrades/singleSection/_addNewAssignment.html',
+          controller: 'addNewAssignmentCtrl'
+        });
+
+        modalInstance.result.then(
+          function (assignment) {
+
+            assignmentFactory.create(assignment).$promise.then(
+              function (result) {
+                // UPDATE ORIGINAL DATASOURCE
+                $scope.originalDataSource.assignments.push(result);
+
+                prepareAssignmentArray($scope.originalDataSource.assignments);
+
+                console.log(result);
+                console.log($scope.columns);
+                console.log($scope.originalDataSource);
+              },
+              function (error) {
+                $log.error('singleSectionCtrl.addNewAssignment', error);
+              }
+            );
+
+          },
+          function () {
+            $log.info('Modal dismissed at: ' + new Date());
+          }
+        );
+      };
+
+      var buildButton = function (className) {
         var button = document.createElement('BUTTON');
-        button.className = 'glyphicon glyphicon-wrench';
+        button.className = 'glyphicon ' + className;
         return button;
       };
 
@@ -143,21 +185,33 @@ angular.module('gradeBookApp.controllers')
       };
 
       /***
-       * UPDATE SINGLE ASSIGNMENT
+       * UPDATE SINGLE GRADE IN ASSIGNMENT
        * Make update request to backend
        * @param assignment
        * @param studentId
        */
-      var updateAssignment = function (assignment, studentId) {
-        assignmentFactory.update({assignmentId: assignment.id},assignment).$promise.then(
+      var updateGrade = function (item, studentId) {
+        gradeFactory.update({gradeId: item.id},item).$promise.then(
           function (result) {
             console.log(result);
             getSingleStudent(studentId);
           },
           function (error) {
-            $log.error('singleSectionCtrl.updateAssignment', error);
+            $log.error('singleSectionCtrl.updateGrade', error);
           }
         );
+      };
+
+      var addGrade = function (item, studentId) {
+        gradeFactory.create(item).$promise.then(
+          function (result) {
+            console.log(result);
+            getSingleStudent(studentId);
+          },
+          function (error) {
+            $log.error('singleSectionCtrl.addGrade', error);
+          }
+        )
       };
 
       /***
@@ -172,16 +226,28 @@ angular.module('gradeBookApp.controllers')
             oldValue = change[2],
             newValue = change[3];
 
+        console.log(oldValue);
+        console.log(newValue);
         if(oldValue != newValue) {
           var user = $scope.originalDataSource.users[userIndex];
-          for (var i = 0, len = user.assignments.length; i < len; i++) {
-            if (user.assignments[i].assignmentId === assignmentIndex) {
-              var assignment =  user.assignments[i];
-              assignment.value = parseInt(newValue,10);
-              updateAssignment(assignment, user.id);
-              break;
+
+          if (oldValue === undefined) {
+            var entry = {
+              assignmentId: assignmentIndex,
+              value: parseInt(newValue,10)
+            };
+            addGrade(entry, user.id);
+          } else {
+            for (var i = 0, len = user.assignments.length; i < len; i++) {
+              if (user.assignments[i].assignmentId === assignmentIndex) {
+                var assignment =  user.assignments[i];
+                assignment.value = parseInt(newValue,10);
+                updateGrade(assignment, user.id);
+                break;
+              }
             }
           }
+
         }
       };
 
@@ -211,8 +277,7 @@ angular.module('gradeBookApp.controllers')
             }
           }
         }
-
-        console.log(newUser);
+        //console.log(newUser);
         return newUser;
       };
 
@@ -222,6 +287,7 @@ angular.module('gradeBookApp.controllers')
        * @param assignments
        */
       var prepareAssignmentArray = function (assignments) {
+        _assignmentArray = [];
         var _columns = defaultColumns();
 
         for (var i = 0, len = assignments.length; i < len; i++) {
@@ -232,6 +298,11 @@ angular.module('gradeBookApp.controllers')
             title: assignments[i].name
           })
         }
+
+        _columns.push({
+          title: 'Add new assignment',
+          readOnly: true
+        });
 
         $scope.columns = _columns;
       };
@@ -279,6 +350,25 @@ angular.module('gradeBookApp.controllers')
 
       $scope.ok = function () {
         $modalInstance.close();
+      };
+
+      $scope.cancel = function () {
+        $modalInstance.dismiss();
+      };
+    }
+  ]
+).controller(
+  'addNewAssignmentCtrl',
+  [
+    '$scope',
+    '$modalInstance',
+    function ($scope, $modalInstance) {
+
+      $scope.assignment = {};
+
+      $scope.ok = function () {
+        console.log($scope.assignment);
+        $modalInstance.close($scope.assignment);
       };
 
       $scope.cancel = function () {

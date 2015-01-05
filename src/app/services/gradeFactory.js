@@ -1,31 +1,31 @@
+/**
+ * Created by jkl on 05.01.15.
+ */
 angular.module('gradeBookApp.services')
   .factory(
-  'assignmentFactory',
+  'gradeFactory',
   [
     'appConfig',
     '$resource',
     '$log',
     function (appConfig, $resource, $log) {
-      return $resource(appConfig.apiUrl + '/assignment/:assignmentId/ ',
+      return $resource(appConfig.apiUrl + '/grade/:gradeId/ ',
         {
-          assignmentId: '@assignmentId'
+          gradeId: '@gradeId'
         },
         {
           create: {
             method: 'POST',
             interceptor: {
               responseError: function (error) {
-                $log.error('POST ERROR:', error);
-
+                $log.error('POST ERROR:', error)
                 return {
-                  id: 4,
-                  name: 'Test',
-                  weight:13,
-                  category:3
+
                 }
               }
             }
           },
+
           update: {
             method: 'PUT',
             interceptor: {
