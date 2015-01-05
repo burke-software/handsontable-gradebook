@@ -19,8 +19,8 @@ module.exports = function (grunt) {
       html2js: {
         commonDirectives: {
           options: {
-            module: 'gradebook.templates',      // ANGULAR MODULE NAME
-            base: 'src/app/directives/',          // REMOVE PATH FROM FILE
+            module: 'gradeBookApp.templates',      // ANGULAR MODULE NAME
+            base: 'src/app/modules/',          // REMOVE PATH FROM FILE
             htmlmin: {
               collapseWhitespace: true,
               removeComments: true
@@ -28,7 +28,8 @@ module.exports = function (grunt) {
           },
           dest: 'tmp/commonDirectives.js',
           src: [
-            'src/app/directives/**/**/**/*.html'
+            'src/app/modules/**/**/*.html',
+            'src/app/modules/**/**/**/*.html'
           ]
         }
       },
@@ -77,8 +78,8 @@ module.exports = function (grunt) {
       app: {
         all: [
           'src/app/directives/**/*.js',
-          'src/app/modules/**/*.js'
-
+          'src/app/modules/**/*.js',
+          'src/app/services/*.js'
         ]
       },
 

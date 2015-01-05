@@ -1,0 +1,20 @@
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>
+        CLASSES
+      </th>
+      <th>
+        SECTIONS
+      </th>
+    </tr>
+  </thead>
+  <tbody ng-repeat="classSection in classSectionList">
+    <tr ng-repeat="section in classSection.sections">
+      <td rowspan="{{classSection.sections.length}}" ng-if="$index == 0">{{classSection.name}}</td>
+      <td>
+        <a ng-href="#/students/classSections/{{section.id}}">{{section.name}}</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
