@@ -18,7 +18,7 @@ angular.module('gradeBookApp.services')
             method: 'GET',
             interceptor: {
               responseError: function (error) {
-                $log.error('GET SINGLE USER ERROR', error);
+                $log.error('GET SINGLE USER:', error);
                 return {
                   id: 1,
                   firstName: 'Ashor',

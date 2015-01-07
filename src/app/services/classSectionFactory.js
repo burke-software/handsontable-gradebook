@@ -13,10 +13,9 @@ angular.module('gradeBookApp.services')
         {
           getBySection: {
             method: 'GET',
-            //TODO -remove after backend connect
             interceptor: {
               responseError: function (error) {
-                $log.error('ERROR:', error);
+                $log.error('GET USER LIST WITH ASSIGNMENTS:', error);
                 return {
                   id: 1,
                   assignments: [
@@ -163,11 +162,9 @@ angular.module('gradeBookApp.services')
           get: {
             method: 'GET',
             isArray: true,
-
-            //TODO -remova after backend connect
             interceptor: {
               responseError: function (error) {
-                $log.error('ERROR:', error);
+                $log.error('GET CLASSES AND SECTIONS:', error);
                 return [
                   {
                     name: 'Algebra II',

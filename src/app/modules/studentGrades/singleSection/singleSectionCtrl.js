@@ -38,13 +38,25 @@ angular.module('gradeBookApp.controllers')
           TH.firstChild.appendChild(adjustButton);
         }
 
-        if (col === _assignmentArray.length + staticColHeadersCount) {
-          var addButton = buildButton('glyphicon-plus');
-          Handsontable.Dom.addEvent(addButton,'click', function (e){
-            addNewAssignment();
-          });
-          TH.firstChild.appendChild(addButton);
+        if (col >= staticColHeadersCount) {
+          if (col === _assignmentArray.length + staticColHeadersCount) {
+            var addButton = buildButton('glyphicon-plus');
+            Handsontable.Dom.addEvent(addButton,'click', function (e){
+              addNewAssignment();
+            });
+            TH.firstChild.appendChild(addButton);
+          } else {
+            var deleteButton = buildButton('glyphicon-minus');
+            Handsontable.Dom.addEvent(deleteButton, 'click', function () {
+              var conf = confirm('Are you sure you want to delete assignment');
+              if (conf) {
+                deleteAssignment(col);
+              }
+            });
+            TH.firstChild.appendChild(deleteButton);
+          }
         }
+
       };
 
       var staticColHeadersCount = 3; //firstName, lastName, finalGrade
@@ -95,6 +107,19 @@ angular.module('gradeBookApp.controllers')
             $log.info('Modal dismissed at: ' + new Date());
           }
         );
+      };
+
+      var deleteAssignment = function (column) {
+        var assignmentId = _assignmentArray[column - staticColHeadersCount];
+        assignmentFactory.delete({assignmentId: assignmentId}).$promise.then(
+          function (result) {
+            $log.log('AFTER DELETE WE SHOULD UPDATE WHOLE DATASET');
+            getSection();
+          },
+          function (error) {
+            $log.error('singleSectionCtrl.deleteAssignment:', error);
+          }
+        )
       };
 
       var buildButton = function (className) {
@@ -304,7 +329,9 @@ angular.module('gradeBookApp.controllers')
           readOnly: true
         });
 
-        $scope.columns = _columns;
+        //var htContainer = document.querySelector('.handsontable-container');
+        //htContainer.style.overflow = 'auto';
+        //$scope.columns = _columns;
       };
 
       var prepareAssignments = function (result) {
@@ -314,7 +341,6 @@ angular.module('gradeBookApp.controllers')
         for (var i = 0, len = result.users.length; i<len;i++) {
           $scope.users.push(prepareSingleStudent(result.users[i]));
         }
-
       };
 
       /***
@@ -326,6 +352,7 @@ angular.module('gradeBookApp.controllers')
         classSectionFactory.getBySection({sectionId: $scope.sectionId}).$promise.then(
           function (result) {
             console.log(result);
+            $scope.users = [];
             prepareAssignments(result);
           },
           function (error) {

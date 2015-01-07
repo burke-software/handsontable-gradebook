@@ -11,11 +11,21 @@ angular.module('gradeBookApp.services')
           assignmentId: '@assignmentId'
         },
         {
+          delete: {
+            method: 'DELETE',
+            interceptor: {
+              responseError: function (error) {
+                $log.error('DELETE SINGLE ASSIGNMENT:', error);
+
+              }
+            }
+          },
+
           create: {
             method: 'POST',
             interceptor: {
               responseError: function (error) {
-                $log.error('POST ERROR:', error);
+                $log.error('CREATE SINGLE ASSIGNMENT:', error);
 
                 return {
                   id: 4,
@@ -30,7 +40,7 @@ angular.module('gradeBookApp.services')
             method: 'PUT',
             interceptor: {
               responseError: function (error) {
-                $log.error('PUT ERROR:', error);
+                $log.error('UPDATE SINGLE ASSIGNMENT:', error);
               }
             }
           }

@@ -18,7 +18,7 @@ angular.module('gradeBookApp.services')
             method: 'POST',
             interceptor: {
               responseError: function (error) {
-                $log.error('POST ERROR:', error)
+                $log.error('ADD NEW GRADE:', error)
                 return {
 
                 }
@@ -30,7 +30,7 @@ angular.module('gradeBookApp.services')
             method: 'PUT',
             interceptor: {
               responseError: function (error) {
-                $log.error('PUT ERROR:', error);
+                $log.error('UPDATE EXISTING GRADE:', error);
               }
             }
           }
