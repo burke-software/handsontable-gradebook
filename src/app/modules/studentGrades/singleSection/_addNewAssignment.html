@@ -18,7 +18,9 @@
     <div class="form-group">
       <label class="col-sm-3 control-label">Category</label>
       <div class="col-sm-8">
-        <select class="form-control"></select>
+        <select class="form-control" ng-model="assignment.category" ng-options="category.id as category.name for category in categories">
+          <option value="">Select category</option>
+        </select>
       </div>
     </div>
   </form>

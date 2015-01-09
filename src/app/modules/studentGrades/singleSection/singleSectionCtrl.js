@@ -329,9 +329,7 @@ angular.module('gradeBookApp.controllers')
           readOnly: true
         });
 
-        //var htContainer = document.querySelector('.handsontable-container');
-        //htContainer.style.overflow = 'auto';
-        //$scope.columns = _columns;
+        $scope.columns = _columns;
       };
 
       var prepareAssignments = function (result) {
@@ -388,10 +386,26 @@ angular.module('gradeBookApp.controllers')
   'addNewAssignmentCtrl',
   [
     '$scope',
+    'categoryFactory',
     '$modalInstance',
-    function ($scope, $modalInstance) {
+    function ($scope, categoryFactory, $modalInstance) {
 
       $scope.assignment = {};
+
+      $scope.categories = [];
+
+      var getCategories = function () {
+        categoryFactory.get().$promise.then(
+          function (result) {
+            $scope.categories = result;
+          },
+          function (error) {
+
+          }
+        )
+      };
+
+      getCategories();
 
       $scope.ok = function () {
         console.log($scope.assignment);
