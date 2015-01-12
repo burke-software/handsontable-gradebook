@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html ng-app="gradeBookApp">
+<head lang="en">
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gradebook</title>
+
+  <!--<link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css">-->
+
+  <link rel="stylesheet" href="https://schooldriver_org.s3.amazonaws.com/gumby_css/gumby.css">
+  <link rel="stylesheet" href="dist/lib/fontawesome/css/font-awesome.min.css">
+  <link href="https://schooldriver_org.s3.amazonaws.com/grappelli/stylesheets/screen.css" rel="stylesheet"
+        type="text/css" media="screen">
+  <link rel="stylesheet" href="dist/lib/handsontable/dist/handsontable.full.css">
+
+  <link rel="stylesheet" href="dist/css/style.css">
+
+  <script src="dist/lib/angular/angular.js"></script>
+  <script src="dist/lib/angular-resource/angular-resource.min.js"></script>
+  <script src="dist/lib/angular-route/angular-route.min.js"></script>
+  <script src="dist/lib/angular-cookies/angular-cookies.min.js"></script>
+  <script src="dist/lib/angular-bootstrap/ui-bootstrap.min.js"></script>
+  <script src="dist/lib/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+  <script src="dist/lib/handsontable/dist/handsontable.full.js"></script>
+  <script src="dist/lib/nghandsontable/dist/ngHandsontable.js"></script>
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+  <script src="dist/app/gradebook.js"></script>
+</head>
+<body>
+<header id="grp-header" class="">
+  <!-- NAVIGATION -->
+  <div class="navcontain">
+    <nav class="navbar fixed" id="nav1" gumby-fixed="top" style="top: 0px;">
+      <div class="sixteen colgrid">
+      <div class="row">
+          <a class="toggle" gumby-trigger="#nav1 > .colgrid > .row > ul" href="#"><i class="icon-menu"></i></a>
+          <div class="two columns logo">
+            <a href="/">
+              <img style="height: 48px; padding-top:10px;" src="https://schooldriver_org.s3.amazonaws.com/images/logo.svg">
+            </a>
+          </div>
+          <ul class="fourteen columns" style="float: right;">
+            <li class="field">
+              <div class="admin-title view_student" style="position: relative;">
+                <form id="form_view_student" style="margin-bottom: 0;" class="view_student">
+                  <input id="id_view_student_text"
+                         class="ui-autocomplete-input view_student search input"
+                         type="text"
+                         placeholder="Lookup Student"
+                         autocomplete="off"
+                         aria-autocomplete="list"
+                         aria-haspopup="true"
+                         style="width:100%;"
+                         role="textbox"
+                         name="view_student_text">
+                </form>
+              </div>
+            </li>
+            <li class="active">
+              <a ng-href="#/students">Students</a>
+            </li>
+            <li>
+              <a ng-href="#/attendance">Attendance</a>
+            </li>
+            <li>
+              <a ng-href="#/courses">Courses</a>
+            </li>
+            <li>
+              <a ng-href="#/cswp">cswp</a>
+            </li>
+            <li>
+              <a ng-href="#/discipline">Discipline</a>
+            </li>
+            <li>
+              <a ng-href="#/counseling">Counseling</a>
+            </li>
+          </ul>
+        </div>
+
+
+        <div class="breadcrumbs">
+          <div id="breadcrumbs_area" class="row">
+            <div class="sixteen columns">
+              <div class="pull_left" id="breadcrumbs">
+
+                <ul class="grp-horizontal-list">
+                  <li><a ng-href="/">Home</a></li>
+                  <li><a ng-href="#/students">Sis</a></li>
+                  <li>Students</li>
+                </ul>
+
+
+              </div>
+              <div class="pull_right">
+                <ul>
+                  <li>
+                    <a>
+                      <img class="nav_icon" src="https://schooldriver_org.s3.amazonaws.com/images/wrench_dark.svg">
+                      Logged in as: Bobby Funk
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+<div class="container" id="grp-content">
+  <ng-view></ng-view>
+</div>
+</body>
+</html>
