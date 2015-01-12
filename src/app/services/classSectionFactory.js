@@ -108,29 +108,7 @@ angular.module('gradeBookApp.services')
                         }
                       ]
                     },
-                    {
-                      id: 4,
-                      firstName: 'Ashor',
-                      lastName: 'Lior',
-                      finalGrade: 0,
-                      assignments: [
-                        {
-                          id:10,
-                          assignmentId:1,
-                          value: 45
-                        },
-                        {
-                          id:11,
-                          assignmentId:2,
-                          value: 75
-                        },
-                        {
-                          id: 12,
-                          assignmentId:3,
-                          value: 87
-                        }
-                      ]
-                    },
+
                     {
                       id: 5,
                       firstName: 'Jacob',
@@ -151,6 +129,98 @@ angular.module('gradeBookApp.services')
                           id: 15,
                           assignmentId:3,
                           value: 57
+                        }
+                      ]
+                    },
+                    {
+                      id: 5,
+                      firstName: 'Maria',
+                      lastName: 'Hadrin',
+                      finalGrade: 0,
+                      assignments: [
+                        {
+                          id:10,
+                          assignmentId:1,
+                          value: 45
+                        },
+                        {
+                          id:11,
+                          assignmentId:2,
+                          value: 75
+                        },
+                        {
+                          id: 12,
+                          assignmentId:3,
+                          value: 87
+                        }
+                      ]
+                    },
+                    {
+                      id: 6,
+                      firstName: 'Salma',
+                      lastName: 'Ortega',
+                      finalGrade: 0,
+                      assignments: [
+                        {
+                          id:10,
+                          assignmentId:1,
+                          value: 45
+                        },
+                        {
+                          id:11,
+                          assignmentId:2,
+                          value: 75
+                        },
+                        {
+                          id: 12,
+                          assignmentId:3,
+                          value: 87
+                        }
+                      ]
+                    },
+                    {
+                      id: 14,
+                      firstName: 'Vincent',
+                      lastName: 'Rose',
+                      finalGrade: 0,
+                      assignments: [
+                        {
+                          id:10,
+                          assignmentId:1,
+                          value: 45
+                        },
+                        {
+                          id:11,
+                          assignmentId:2,
+                          value: 75
+                        },
+                        {
+                          id: 12,
+                          assignmentId:3,
+                          value: 87
+                        }
+                      ]
+                    },
+                    {
+                      id: 24,
+                      firstName: 'Allen',
+                      lastName: 'West',
+                      finalGrade: 0,
+                      assignments: [
+                        {
+                          id:10,
+                          assignmentId:1,
+                          value: 45
+                        },
+                        {
+                          id:11,
+                          assignmentId:2,
+                          value: 75
+                        },
+                        {
+                          id: 12,
+                          assignmentId:3,
+                          value: 87
                         }
                       ]
                     }

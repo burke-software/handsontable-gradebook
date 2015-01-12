@@ -31,7 +31,7 @@ angular.module('gradeBookApp.controllers')
       $scope.afterGetColHeader = function (col, TH) {
         // FOR FINAL GRADE COL HEADER
         if (col === 2) {
-          var adjustButton = buildButton('glyphicon-wrench');
+          var adjustButton = buildButton('fa fa-wrench');
           Handsontable.Dom.addEvent(adjustButton,'click', function (e){
             adjustGradeSettings();
           });
@@ -40,13 +40,13 @@ angular.module('gradeBookApp.controllers')
 
         if (col >= staticColHeadersCount) {
           if (col === _assignmentArray.length + staticColHeadersCount) {
-            var addButton = buildButton('glyphicon-plus');
+            var addButton = buildButton('fa fa-plus-square');
             Handsontable.Dom.addEvent(addButton,'click', function (e){
               addNewAssignment();
             });
             TH.firstChild.appendChild(addButton);
           } else {
-            var deleteButton = buildButton('glyphicon-minus');
+            var deleteButton = buildButton('fa fa-minus-square');
             Handsontable.Dom.addEvent(deleteButton, 'click', function () {
               var conf = confirm('Are you sure you want to delete assignment');
               if (conf) {
@@ -65,6 +65,7 @@ angular.module('gradeBookApp.controllers')
         console.log('adjustGradeSettings');
 
         var modalInstance = $modal.open({
+          windowClass: "modal fade in active",
           templateUrl:'studentGrades/singleSection/_adjustGradeSettings.html',
           controller: 'adjustGradeSettingsCtrl',
           resolve: {
@@ -79,6 +80,7 @@ angular.module('gradeBookApp.controllers')
         console.log('addNewAssignment');
 
         var modalInstance = $modal.open({
+          windowClass: "modal fade in active",
           templateUrl:'studentGrades/singleSection/_addNewAssignment.html',
           controller: 'addNewAssignmentCtrl'
         });
@@ -123,9 +125,12 @@ angular.module('gradeBookApp.controllers')
       };
 
       var buildButton = function (className) {
-        var button = document.createElement('BUTTON');
-        button.className = 'glyphicon ' + className;
-        return button;
+        //var button = document.createElement('BUTTON');
+        var icon = document.createElement('i');
+        icon.className = className + ' button';
+        //button.appendChild(icon);
+        //button.className = 'glyphicon ' + className;
+        return icon;
       };
 
       /***
