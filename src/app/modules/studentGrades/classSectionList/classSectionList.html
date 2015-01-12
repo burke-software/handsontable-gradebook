@@ -1,3 +1,26 @@
+<h1>Student grades</h1>
+
+<div class="row">
+  <span>Please select teacher and year</span>
+</div>
+<div class="row">
+  <label class="two columns">Year</label>
+  <div class="five columns">
+    <select ng-model="select.year" ng-options="year as year for year in years">
+      <option value="">Select year</option>
+    </select>
+  </div>
+</div>
+<div class="row">
+  <label class="two columns">Teacher</label>
+  <div class="five columns">
+    <select ng-model="select.teacher" ng-options="teacher for teacher in teachers">
+      <option value="">Select teacher</option>
+    </select>
+  </div>
+</div>
+
+<h1 class="text-center">select a class section to edit grades</h1>
 <div class="row">
   <table class="table table-bordered">
     <thead>

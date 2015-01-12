@@ -73,6 +73,34 @@ angular.module('gradeBookApp.controllers')
 
       $scope.classSectionList = [];
 
+      $scope.select = {};
+
+      $scope.years = [];
+
+      $scope.teachers = [
+        "Teacher 1", "Teacher 2", "Teacher 3"
+      ];
+
+      $scope.$watch('select.teacher',function () {
+        if ($scope.select.year && $scope.select.teacher) {
+          getClassSectionList();
+        }
+      });
+
+      $scope.$watch('select.year',function () {
+        if ($scope.select.year && $scope.select.teacher) {
+          getClassSectionList();
+        }
+      });
+
+      var createYears = function () {
+        for(var i = 2000, j = 2015;  i < j; i++) {
+          $scope.years.push(i);
+        }
+      };
+
+      createYears();
+
       var getClassSectionList = function () {
         classSectionFactory.get().$promise.then(
           function (result){
@@ -84,7 +112,7 @@ angular.module('gradeBookApp.controllers')
         )
       };
 
-      getClassSectionList();
+      //getClassSectionList();
 
     }
   ]
@@ -1003,7 +1031,7 @@ angular.module('gradeBookApp.templates', ['studentGrades/classSectionList/classS
 
 angular.module("studentGrades/classSectionList/classSectionList.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("studentGrades/classSectionList/classSectionList.html",
-    "<div class=\"row\"><table class=\"table table-bordered\"><thead><tr><th>CLASSES</th><th>SECTIONS</th></tr></thead><tbody ng-repeat=\"classSection in classSectionList\"><tr ng-repeat=\"section in classSection.sections\"><td rowspan=\"{{classSection.sections.length}}\" ng-if=\"$index == 0\">{{classSection.name}}</td><td><a ng-href=\"#/students/classSections/{{section.id}}\">{{section.name}}</a></td></tr></tbody></table></div>");
+    "<h1>Student grades</h1><div class=\"row\"><span>Please select teacher and year</span></div><div class=\"row\"><label class=\"two columns\">Year</label><div class=\"five columns\"><select ng-model=\"select.year\" ng-options=\"year as year for year in years\"><option value=\"\">Select year</option></select></div></div><div class=\"row\"><label class=\"two columns\">Teacher</label><div class=\"five columns\"><select ng-model=\"select.teacher\" ng-options=\"teacher for teacher in teachers\"><option value=\"\">Select teacher</option></select></div></div><h1 class=\"text-center\">select a class section to edit grades</h1><div class=\"row\"><table class=\"table table-bordered\"><thead><tr><th>CLASSES</th><th>SECTIONS</th></tr></thead><tbody ng-repeat=\"classSection in classSectionList\"><tr ng-repeat=\"section in classSection.sections\"><td rowspan=\"{{classSection.sections.length}}\" ng-if=\"$index == 0\">{{classSection.name}}</td><td><a ng-href=\"#/students/classSections/{{section.id}}\">{{section.name}}</a></td></tr></tbody></table></div>");
 }]);
 
 angular.module("studentGrades/singleSection/_addNewAssignment.html", []).run(["$templateCache", function($templateCache) {
