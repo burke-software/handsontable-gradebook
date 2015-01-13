@@ -17,87 +17,466 @@ angular.module('gradeBookApp', [
     function ($provide, $routeProvider) {
       $provide.factory('appConfig', function () {
         return {
-          apiUrl: 'http://192.168.59.103:8000/api/'
+          apiUrl: ''
         }
       });
 
       $routeProvider.
-        when('/gradebook/',{
-          controller: 'gradeBookCtrl',
-          templateUrl: 'gradebook/gradebook.html'
-        })
-        //.when('/gradebook/',{
-        //  controller: 'coursesCtrl',
-        //  templateUrl: 'courses/courses.html'
-        //})
-        .when('/gradebook/sections/:sectionId',{
-          controller: 'singleSectionCtrl',
-          templateUrl: 'singleSection/singleSection.html'
-        });
+        when('/login', {
 
-    }
-  ]
-).run(
-  [
-    '$http',
-    '$cookies',
-    function ($http,$cookies){
-      $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
+        })
+        .when('/students',{
+
+        })
+        .when('/attendance',{
+
+        })
+        .when('/courses',{
+
+        })
+        .when('/cswp',{
+
+        })
+        .when('/discipline',{
+
+        })
+        .when('/counseling',{
+
+        })
+        .when('/students/classSections',{
+          controller: 'classSectionListCtrl',
+          templateUrl: 'studentGrades/classSectionList/classSectionList.html'
+        })
+        .when('/students/classSections/:sectionId',{
+          controller: 'singleSectionCtrl',
+          templateUrl: 'studentGrades/singleSection/singleSection.html'
+        })
+        .otherwise({
+          redirectTo: '/students/classSections'
+        });
     }
   ]
 );
+
+
 angular.module('gradeBookApp.services', []);
 angular.module('gradeBookApp.controllers',[]);
 
 angular.module('gradeBookApp.controllers')
-.controller(
-  'gradeBookCtrl',
+  .controller(
+  'classSectionListCtrl',
   [
     '$scope',
-    'courseFactory',
-    'assignmentFactory',
-    'schoolYearFactory',
     'classSectionFactory',
     '$log',
-    function ($scope, courseFactory, assignmentFactory, schoolYearFactory, classSectionFactory, $log) {
+    function ($scope, classSectionFactory, $log) {
 
-      var getCourses = function () {
-        courseFactory.get().$promise.then(
-          function (result) {
-            $scope.courses = result['results'];
+      $scope.classSectionList = [];
+
+      $scope.select = {};
+
+      $scope.years = [];
+
+      $scope.teachers = [
+        "Teacher 1", "Teacher 2", "Teacher 3"
+      ];
+
+      $scope.$watch('select.teacher',function () {
+        if ($scope.select.year && $scope.select.teacher) {
+          getClassSectionList();
+        }
+      });
+
+      $scope.$watch('select.year',function () {
+        if ($scope.select.year && $scope.select.teacher) {
+          getClassSectionList();
+        }
+      });
+
+      var createYears = function () {
+        for(var i = 2000, j = 2015;  i < j; i++) {
+          $scope.years.push(i);
+        }
+      };
+
+      createYears();
+
+      var getClassSectionList = function () {
+        classSectionFactory.get().$promise.then(
+          function (result){
+            $scope.classSectionList = result;
+          },
+          function (error) {
+            $log.error('classSectionListCtrl:getClassSectionList', error);
           }
         )
       };
 
-      var hideRightColumn = function () {
-        $scope.filtersVisible = false;
-        $scope.settingsVisible = false;
-        $scope.assignmentVisible = false;
-        $scope.notificationVisible = false;
-        $scope.colorGuideVisible = false;
-        $scope.notificationType = null;
+      //getClassSectionList();
+
+    }
+  ]
+);
+
+angular.module('gradeBookApp.controllers')
+  .controller(
+  'singleSectionCtrl',
+  [
+    '$scope',
+    'classSectionFactory',
+    'assignmentFactory',
+    'gradeFactory',
+    'studentFactory',
+    '$routeParams',
+    '$modal',
+    '$log',
+    function ($scope, classSectionFactory, assignmentFactory, gradeFactory, studentFactory, $routeParams, $modal, $log) {
+      $scope.sectionId = $routeParams.sectionId;
+
+      if (!$scope.sectionId) {
+        return;
+      }
+
+      $scope.originalDataSource = [];
+      $scope.users = [];
+      $scope.columns = [];
+
+      $scope.afterChange = function (change, source) {
+        if (source === 'loadData') {
+          return;
+        }
+        serveChanges(change[0]);
       };
 
-      var getActiveMarkingPeriod = function () {
-        schoolYearFactory.get().$promise.then(
-          function (result){
-            for (var i = 0, len = result.length; i < len; i++) {
-              if (result[i].active_year){
-                $scope.markingPeriodSet = result[i].markingperiod_set;
+      $scope.afterGetColHeader = function (col, TH) {
+        // FOR FINAL GRADE COL HEADER
+        if (col === 2) {
+          var adjustButton = buildButton('fa fa-wrench');
+          Handsontable.Dom.addEvent(adjustButton,'click', function (e){
+            adjustGradeSettings();
+          });
+          TH.firstChild.appendChild(adjustButton);
+        }
+
+        if (col >= staticColHeadersCount) {
+          if (col === _assignmentArray.length + staticColHeadersCount) {
+            var addButton = buildButton('fa fa-plus-square');
+            Handsontable.Dom.addEvent(addButton,'click', function (e){
+              addNewAssignment();
+            });
+            TH.firstChild.appendChild(addButton);
+          } else {
+            var deleteButton = buildButton('fa fa-minus-square');
+            Handsontable.Dom.addEvent(deleteButton, 'click', function () {
+              var conf = confirm('Are you sure you want to delete assignment');
+              if (conf) {
+                deleteAssignment(col);
+              }
+            });
+            TH.firstChild.appendChild(deleteButton);
+          }
+        }
+
+      };
+
+      var staticColHeadersCount = 3; //firstName, lastName, finalGrade
+
+      var adjustGradeSettings = function () {
+        console.log('adjustGradeSettings');
+
+        var modalInstance = $modal.open({
+          windowClass: "modal fade in active",
+          templateUrl:'studentGrades/singleSection/_adjustGradeSettings.html',
+          controller: 'adjustGradeSettingsCtrl',
+          resolve: {
+            assignments: function () {
+              return $scope.originalDataSource.assignments;
+            }
+          }
+        });
+      };
+
+      var addNewAssignment = function () {
+        console.log('addNewAssignment');
+
+        var modalInstance = $modal.open({
+          windowClass: "modal fade in active",
+          templateUrl:'studentGrades/singleSection/_addNewAssignment.html',
+          controller: 'addNewAssignmentCtrl'
+        });
+
+        modalInstance.result.then(
+          function (assignment) {
+
+            assignmentFactory.create(assignment).$promise.then(
+              function (result) {
+                // UPDATE ORIGINAL DATASOURCE
+                $scope.originalDataSource.assignments.push(result);
+
+                prepareAssignmentArray($scope.originalDataSource.assignments);
+
+                console.log(result);
+                console.log($scope.columns);
+                console.log($scope.originalDataSource);
+              },
+              function (error) {
+                $log.error('singleSectionCtrl.addNewAssignment', error);
+              }
+            );
+
+          },
+          function () {
+            $log.info('Modal dismissed at: ' + new Date());
+          }
+        );
+      };
+
+      var deleteAssignment = function (column) {
+        var assignmentId = _assignmentArray[column - staticColHeadersCount];
+        assignmentFactory.delete({assignmentId: assignmentId}).$promise.then(
+          function (result) {
+            $log.log('AFTER DELETE WE SHOULD UPDATE WHOLE DATASET');
+            getSection();
+          },
+          function (error) {
+            $log.error('singleSectionCtrl.deleteAssignment:', error);
+          }
+        )
+      };
+
+      var buildButton = function (className) {
+        //var button = document.createElement('BUTTON');
+        var icon = document.createElement('i');
+        icon.className = className + ' button';
+        //button.appendChild(icon);
+        //button.className = 'glyphicon ' + className;
+        return icon;
+      };
+
+      /***
+       * GET DEFAULT COLUMNS - FIRST THREE
+       * @return {{data: string, title: string, readOnly: boolean}[]}
+       */
+      var defaultColumns = function () {
+        return [
+          {
+            data: 'firstName',
+            title: 'First Name',
+            readOnly: true
+          },
+          {
+            data: 'lastName',
+            title: 'Last Name',
+            readOnly: true
+          },
+          {
+            data: 'finalGrade',
+            title: 'Final Grade',
+            readOnly: true
+          }
+        ]
+      };
+
+      /***
+       * GET ORIGINAL ID FOR ASSIGNMENT BASED ON ASSIGNMENT TEMPORARY NAME
+       * @param assignmentName
+       * @return {Number}
+       */
+      var getAssignmentIndex = function (assignmentName) {
+        var id = assignmentName.split('assignment_')[1];
+        return parseInt(id, 10);
+      };
+
+      /***
+       * UPDATE ORIGINAL DATASOURCE - TO KEEP ALL DATA UP TO DATE
+       * @param studentId
+       * @param studentObject
+       */
+      var updateOriginalDataSource = function (studentId, studentObject) {
+        for (var i = 0, len = $scope.originalDataSource.length; i < len;i++) {
+          var student = $scope.originalDataSource[i];
+          if (student.id === studentId) {
+            student = studentObject;
+            break;
+          }
+        }
+      };
+
+      /***
+       * UPDATE DATASOURCE WHICH IS MAIN SOURCE FOR HANDSONTABLE
+       * @param studentId
+       * @param studentObject
+       */
+      var updateTransformedDataSource = function (studentId, studentObject) {
+        for (var i = 0, len = $scope.users.length; i < len;i++) {
+          if ($scope.users[i].id === studentId) {
+            $scope.users[i] = studentObject;
+            break;
+          }
+        }
+      };
+
+      /***
+       * GET SINGLE STUDENT AFTER UPDATE
+       * @param studentId
+       */
+      var getSingleStudent = function (studentId) {
+        studentFactory.get({studentId: studentId}).$promise.then(
+          function (result) {
+            //console.log(result);
+            updateOriginalDataSource(studentId, result);
+            var transformedStudent = prepareSingleStudent(result);
+            updateTransformedDataSource(studentId, transformedStudent);
+          },
+          function (error) {
+            $log.error('singleSectionCtrl.getSingleStudent', error);
+          }
+        )
+      };
+
+      /***
+       * UPDATE SINGLE GRADE IN ASSIGNMENT
+       * Make update request to backend
+       * @param assignment
+       * @param studentId
+       */
+      var updateGrade = function (item, studentId) {
+        gradeFactory.update({gradeId: item.id},item).$promise.then(
+          function (result) {
+            console.log(result);
+            getSingleStudent(studentId);
+          },
+          function (error) {
+            $log.error('singleSectionCtrl.updateGrade', error);
+          }
+        );
+      };
+
+      var addGrade = function (item, studentId) {
+        gradeFactory.create(item).$promise.then(
+          function (result) {
+            console.log(result);
+            getSingleStudent(studentId);
+          },
+          function (error) {
+            $log.error('singleSectionCtrl.addGrade', error);
+          }
+        )
+      };
+
+      /***
+       * SERVE CHANGES
+       * Fire all methods after cell change
+       * @param change
+       */
+      var serveChanges = function (change) {
+        console.log('serveChange');
+        var userIndex = change[0],
+            assignmentIndex = getAssignmentIndex(change[1]),
+            oldValue = change[2],
+            newValue = change[3];
+
+        console.log(oldValue);
+        console.log(newValue);
+        if(oldValue != newValue) {
+          var user = $scope.originalDataSource.users[userIndex];
+
+          if (oldValue === undefined) {
+            var entry = {
+              assignmentId: assignmentIndex,
+              value: parseInt(newValue,10)
+            };
+            addGrade(entry, user.id);
+          } else {
+            for (var i = 0, len = user.assignments.length; i < len; i++) {
+              if (user.assignments[i].assignmentId === assignmentIndex) {
+                var assignment =  user.assignments[i];
+                assignment.value = parseInt(newValue,10);
+                updateGrade(assignment, user.id);
                 break;
               }
             }
           }
-        )
+
+        }
       };
 
-      $scope.getSection = function (sectionId) {
-        $scope.activeSection = sectionId;
-        classSectionFactory.getBySection({sectionId: sectionId}).$promise.then(
+      var _assignmentArray = [];
+
+      /***
+       * PREPARE STUDENT FROM ORIGINAL DATASOURCE TO TRANSFORMED ONE
+       * @param user
+       * @return {{id: *, firstName: (*|.get.interceptor.responseError.firstName|.getBySection.interceptor.responseError.firstName), lastName: (*|.get.interceptor.responseError.lastName|.getBySection.interceptor.responseError.lastName), finalGrade: (*|.get.interceptor.responseError.finalGrade|.getBySection.interceptor.responseError.finalGrade)}}
+       */
+      var prepareSingleStudent = function (user) {
+        var newUser = {
+          id:user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          finalGrade: user.finalGrade
+        };
+
+        var userAssignments = user.assignments;
+
+        for (var a = 0, aLen = _assignmentArray.length; a < aLen; a++) {
+          var _assignmentId = _assignmentArray[a];
+
+          for(var u = 0, uLen = userAssignments.length; u < uLen; u++) {
+            if (userAssignments[u].assignmentId === _assignmentId) {
+              newUser['assignment_' + _assignmentId] = userAssignments[u].value;
+            }
+          }
+        }
+        //console.log(newUser);
+        return newUser;
+      };
+
+      /***
+       * PREPARE ARRAY OF ASSIGNMENTS
+       * To keep all assignments in order. Required for correct headers render
+       * @param assignments
+       */
+      var prepareAssignmentArray = function (assignments) {
+        _assignmentArray = [];
+        var _columns = defaultColumns();
+
+        for (var i = 0, len = assignments.length; i < len; i++) {
+          _assignmentArray.push(assignments[i].id);
+
+          _columns.push({
+            data: 'assignment_' +  assignments[i].id,
+            title: assignments[i].name
+          })
+        }
+
+        _columns.push({
+          title: 'Add new assignment',
+          readOnly: true
+        });
+
+        $scope.columns = _columns;
+      };
+
+      var prepareAssignments = function (result) {
+        $scope.originalDataSource = result;
+        prepareAssignmentArray(result.assignments);
+
+        for (var i = 0, len = result.users.length; i<len;i++) {
+          $scope.users.push(prepareSingleStudent(result.users[i]));
+        }
+      };
+
+      /***
+       * GET SECTION
+       * Get list of all students for section with assignments
+       */
+      var getSection = function () {
+        console.log('getSection');
+        classSectionFactory.getBySection({sectionId: $scope.sectionId}).$promise.then(
           function (result) {
             console.log(result);
             $scope.users = [];
-            //prepareAssignments(result);
+            prepareAssignments(result);
           },
           function (error) {
             $log.error('singleSectionCtrl:getSection', error);
@@ -105,88 +484,62 @@ angular.module('gradeBookApp.controllers')
         )
       };
 
-      $scope.newAssignment = {};
+      getSection();
+    }
+  ]
+).controller(
+  'adjustGradeSettingsCtrl',
+  [
+    '$scope',
+    '$modalInstance',
+    'assignments',
+    function ($scope, $modalInstance,assignments) {
 
-      $scope.markingPeriodSet = [];
+      $scope.assignments = assignments;
+      console.log(assignments);
 
-      $scope.saveAssignment = function () {
-        assignmentFactory.create($scope.newAssignment).$promise.then(
+      $scope.ok = function () {
+        $modalInstance.close();
+      };
+
+      $scope.cancel = function () {
+        $modalInstance.dismiss();
+      };
+    }
+  ]
+).controller(
+  'addNewAssignmentCtrl',
+  [
+    '$scope',
+    'categoryFactory',
+    '$modalInstance',
+    function ($scope, categoryFactory, $modalInstance) {
+
+      $scope.assignment = {};
+
+      $scope.categories = [];
+
+      var getCategories = function () {
+        categoryFactory.get().$promise.then(
           function (result) {
-            console.log(result);
-            hideRightColumn();
+            $scope.categories = result;
+          },
+          function (error) {
+
           }
         )
       };
 
-      $scope.notificationType = null;
-      $scope.filtersVisible = false;
-      $scope.settingsVisible = false;
-      $scope.assignmentVisible = false;
-      $scope.multipleAssignments = false;
-      $scope.notificationVisible = false;
-      $scope.colorGuideVisible = false;
+      getCategories();
 
-
-      $scope.search = {
-        where: 'all',
-        what: null
-      };
-
-      $scope.activeSection = null;
-
-      $scope.settings = {};
-
-      $scope.settings.colorHeaders = {};
-
-      $scope.setSearchRange = function (value) {
-        $scope.search.where = value;
+      $scope.ok = function () {
+        console.log($scope.assignment);
+        $modalInstance.close($scope.assignment);
       };
 
       $scope.cancel = function () {
-        hideRightColumn();
+        $modalInstance.dismiss();
       };
-
-      $scope.toggleFilter = function () {
-        hideRightColumn();
-        $scope.filtersVisible = true;
-      };
-
-      $scope.toggleSettings = function () {
-        hideRightColumn();
-        $scope.settingsVisible = true;
-      };
-
-      $scope.toggleAssignments = function (readOnly) {
-        $scope.readOnly = readOnly;
-        hideRightColumn();
-        $scope.assignmentVisible = true;
-      };
-
-      $scope.showMultipleAssignments = function (multiple) {
-        $scope.multipleAssignments = multiple;
-      };
-
-      $scope.editAssignment = function () {
-        $scope.readOnly = false;
-        hideRightColumn();
-        $scope.assignmentVisible = true;
-      };
-
-      $scope.showIconsGuide = function () {
-        hideRightColumn();
-        $scope.colorGuideVisible = true;
-      };
-
-      $scope.showNotificationDescription = function (notificationType) {
-        hideRightColumn();
-        $scope.notificationType = notificationType;
-        $scope.notificationVisible = true;
-      };
-
-
-      getCourses();
-      getActiveMarkingPeriod();
-
     }
   ]
 );
@@ -197,17 +550,45 @@ angular.module('gradeBookApp.services')
   [
     'appConfig',
     '$resource',
-    function (appConfig, $resource) {
-      return $resource(appConfig.apiUrl + 'assignments/:assignmentId/ ',
+    '$log',
+    function (appConfig, $resource, $log) {
+      return $resource(appConfig.apiUrl + '/assignment/:assignmentId/ ',
         {
           assignmentId: '@assignmentId'
         },
         {
+          delete: {
+            method: 'DELETE',
+            interceptor: {
+              responseError: function (error) {
+                $log.error('DELETE SINGLE ASSIGNMENT:', error);
+
+              }
+            }
+          },
+
           create: {
-            method: 'POST'
+            method: 'POST',
+            interceptor: {
+              responseError: function (error) {
+                $log.error('CREATE SINGLE ASSIGNMENT:', error);
+
+                return {
+                  id: 4,
+                  name: 'Test',
+                  weight:13,
+                  category:3
+                }
+              }
+            }
           },
           update: {
-            method: 'PUT'
+            method: 'PUT',
+            interceptor: {
+              responseError: function (error) {
+                $log.error('UPDATE SINGLE ASSIGNMENT:', error);
+              }
+            }
           }
         }
       )
@@ -264,7 +645,7 @@ angular.module('gradeBookApp.services')
     '$resource',
     '$log',
     function (appConfig, $resource, $log){
-      return $resource(appConfig.apiUrl + 'classSection/:sectionId/ ',
+      return $resource(appConfig.apiUrl + '/classSection/:sectionId/ ',
         {
           sectionId: '@sectionId'
         },
@@ -551,30 +932,6 @@ angular.module('gradeBookApp.services')
   ]
 );
 
-angular.module('gradeBookApp.services')
-  .factory(
-  'courseFactory',
-  [
-    'appConfig',
-    '$resource',
-    function (appConfig, $resource) {
-      return $resource(appConfig.apiUrl + 'courses/:courseId/ ',
-        {
-          courseId: '@courseId'
-        },
-        {
-          create: {
-            method: 'POST'
-          },
-          update: {
-            method: 'PUT'
-          }
-        }
-      )
-    }
-  ]
-);
-
 /**
  * Created by jkl on 05.01.15.
  */
@@ -584,75 +941,32 @@ angular.module('gradeBookApp.services')
   [
     'appConfig',
     '$resource',
-    function (appConfig, $resource) {
-      return $resource(appConfig.apiUrl + 'grades/:gradeId/ ',
+    '$log',
+    function (appConfig, $resource, $log) {
+      return $resource(appConfig.apiUrl + '/grade/:gradeId/ ',
         {
           gradeId: '@gradeId'
         },
         {
           create: {
-            method: 'POST'
+            method: 'POST',
+            interceptor: {
+              responseError: function (error) {
+                $log.error('ADD NEW GRADE:', error)
+                return {
 
+                }
+              }
+            }
           },
 
           update: {
-            method: 'PUT'
-
-          }
-        }
-      )
-    }
-  ]
-);
-
-angular.module('gradeBookApp.services')
-  .factory(
-  'schoolYearFactory',
-  [
-    'appConfig',
-    '$resource',
-    function (appConfig, $resource) {
-      return $resource(appConfig.apiUrl + 'school_years/:schoolYearId/ ',
-        {
-          schoolYearId: '@schoolYearId'
-        },
-        {
-          get: {
-            isArray: true
-          },
-          create: {
-            method: 'POST'
-          },
-          update: {
-            method: 'PUT'
-          }
-        }
-      )
-    }
-  ]
-);
-
-angular.module('gradeBookApp.services')
-  .factory(
-  'sectionFactory',
-  [
-    'appConfig',
-    '$resource',
-    function (appConfig, $resource) {
-      return $resource(appConfig.apiUrl + 'sections/:sectionId/ ',
-        {
-          sectionId: '@sectionId'
-        },
-        {
-          //TEST IF IT WORKS
-          get: {
-            isArray: true
-          },
-          create: {
-            method: 'POST'
-          },
-          update: {
-            method: 'PUT'
+            method: 'PUT',
+            interceptor: {
+              responseError: function (error) {
+                $log.error('UPDATE EXISTING GRADE:', error);
+              }
+            }
           }
         }
       )
@@ -713,465 +1027,24 @@ angular.module('gradeBookApp.services')
   ]
 );
 
-angular.module('gradeBookApp.templates', ['gradebook/gradebook.html']);
+angular.module('gradeBookApp.templates', ['studentGrades/classSectionList/classSectionList.html', 'studentGrades/singleSection/_addNewAssignment.html', 'studentGrades/singleSection/_adjustGradeSettings.html', 'studentGrades/singleSection/singleSection.html']);
 
-angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("gradebook/gradebook.html",
-    "<div id=\"gradebook\">\n" +
-    "\n" +
-    "  <div class=\"col-sm-3 hidden-xs left-filter\">\n" +
-    "\n" +
-    "    <h2>Gradebook</h2>\n" +
-    "\n" +
-    "    <div class=\"form-group\">\n" +
-    "      <ul class=\"nav nav-pills\">\n" +
-    "        <li data-ng-class=\"{'active': search.where === 'all'}\">\n" +
-    "          <a data-ng-click=\"setSearchRange('all')\">All</a>\n" +
-    "        </li>\n" +
-    "        <li data-ng-class=\"{'active': search.where === 'teacher'}\">\n" +
-    "          <a data-ng-click=\"setSearchRange('teacher')\">Teacher</a>\n" +
-    "        </li>\n" +
-    "        <li data-ng-class=\"{'active': search.where === 'year'}\">\n" +
-    "          <a data-ng-click=\"setSearchRange('year')\">Year</a>\n" +
-    "        </li>\n" +
-    "        <li data-ng-class=\"{'active': search.where === 'student'}\">\n" +
-    "          <a data-ng-click=\"setSearchRange('student')\">Student</a>\n" +
-    "        </li>\n" +
-    "      </ul>\n" +
-    "      <input type=\"text\" class=\"form-control\" placeholder=\"Type to filter\">\n" +
-    "    </div>\n" +
-    "\n" +
-    "\n" +
-    "    <ul class=\"nav\">\n" +
-    "\n" +
-    "      <li data-ng-repeat=\"course in courses\">\n" +
-    "        {{course.fullname}}\n" +
-    "        <ul class=\"nav\">\n" +
-    "          <li data-ng-repeat=\"section in course.sections\" data-ng-class=\"{'active': section.id === activeSection}\">\n" +
-    "            <a data-ng-click=\"getSection(section.id)\">{{section.name}}</a>\n" +
-    "          </li>\n" +
-    "        </ul>\n" +
-    "      </li>\n" +
-    "\n" +
-    "      <li>Math 101\n" +
-    "        <ul class=\"nav\">\n" +
-    "          <li>\n" +
-    "            <a href=\"\">Group A</a>\n" +
-    "          </li>\n" +
-    "          <li>\n" +
-    "            <a href=\"\">Group B</a>\n" +
-    "          </li>\n" +
-    "          <li>\n" +
-    "            <a href=\"\">Gruop C</a>\n" +
-    "          </li>\n" +
-    "        </ul>\n" +
-    "      </li>\n" +
-    "      <li>Math 102\n" +
-    "        <ul class=\"nav\">\n" +
-    "          <li>\n" +
-    "            <a href=\"\">Group A</a>\n" +
-    "          </li>\n" +
-    "          <li>\n" +
-    "            <a href=\"\">Group B</a>\n" +
-    "          </li>\n" +
-    "        </ul>\n" +
-    "      </li>\n" +
-    "    </ul>\n" +
-    "  </div>\n" +
-    "\n" +
-    "  <div class=\"col-sm-9 col-sm-offset-3\">\n" +
-    "    <h2>Math 101: Group A</h2>\n" +
-    "\n" +
-    "    <div class=\"col-xs-12\">\n" +
-    "      <div class=\"pull-left\">\n" +
-    "        <button class=\"btn btn-primary visible-xs\" data-ng-click=\"showSearch()\">Show search</button>\n" +
-    "        <button class=\"btn btn-primary\" data-ng-click=\"toggleAssignments(false)\"><i class=\"fa fa-plus\"></i>&nbsp;Add Assignment(s)</button>\n" +
-    "        <button class=\"btn btn-primary\" data-ng-click=\"toggleFilter()\"><i class=\"fa fa-filter\"></i>&nbsp;Filters</button>\n" +
-    "        <button class=\"btn btn-primary\" data-ng-click=\"toggleSettings()\"><i class=\"fa fa-sliders\"></i>&nbsp;Settings</button>\n" +
-    "        <!--<button class=\"btn btn-primary\" data-ng-click=\"toggleAssignments(true)\">ReadOnly test</button>-->\n" +
-    "      </div>\n" +
-    "      <div class=\"pull-left\" style=\"padding-left: 15px\">\n" +
-    "        <p style=\"margin-bottom: -3px; margin-top:-1px\">Click on an assignment to view and edit details</p>\n" +
-    "        <a data-ng-click=\"showIconsGuide()\">What do the icons and colors in the cells mean?</a>\n" +
-    "      </div>\n" +
-    "    </div>\n" +
-    "    <div class=\"col-xs-12\" style=\"overflow: auto; padding-bottom: 20px;\">\n" +
-    "\n" +
-    "      <hot-table\n" +
-    "        afterChange=\"afterChange\" ,\n" +
-    "        afterGetColHeader=\"afterGetColHeader\" ,\n" +
-    "        rowHeaders=\"true\"\n" +
-    "        colHeaders=\"true\"\n" +
-    "        datarows=\"users\"\n" +
-    "        columns=\"columns\"\n" +
-    "        fixedColumnsLeft=\"2\"\n" +
-    "        minSpareRows=\"1\"\n" +
-    "        minSpareCols=\"1\">\n" +
-    "      </hot-table>\n" +
-    "    </div>\n" +
-    "  </div>\n" +
-    "\n" +
-    "  <div class=\"col-xs-3 right-settings\"  data-ng-class=\"{'hidden':!assignmentVisible}\">\n" +
-    "    <h2 data-ng-if=\"!readOnly\">\n" +
-    "      <span data-ng-if=\"!multipleAssignments\">Add Assignment</span>\n" +
-    "      <span data-ng-if=\"multipleAssignments\">Add Assignments</span>\n" +
-    "    </h2>\n" +
-    "    <h2 data-ng-if=\"readOnly\">View Assignment</h2>\n" +
-    "    <form>\n" +
-    "      <div class=\"form-group\" data-ng-init=\"multipleAssignments = false\">\n" +
-    "        <div class=\"col-xs-12 two-states\">\n" +
-    "          <button class=\"col-xs-6 btn btn-default\" data-ng-class=\"{'btn-primary': multipleAssignments == false}\" data-ng-click=\"multipleAssignments = false\">Single</button>\n" +
-    "          <button class=\"col-xs-6 btn btn-default\" data-ng-class=\"{'btn-primary': multipleAssignments == true}\" data-ng-click=\"multipleAssignments = true\">Multiple</button>\n" +
-    "        </div>\n" +
-    "        <!--<div class=\"col-xs-12\">-->\n" +
-    "          <!--<div class=\"radio-inline\">-->\n" +
-    "            <!--<input type=\"radio\" id=\"singleAssignment\" data-ng-model=\"multipleAssignments\" data-ng-value=\"false\">-->\n" +
-    "            <!--<label for=\"singleAssignment\">Single</label>-->\n" +
-    "          <!--</div>-->\n" +
-    "          <!--<div class=\"radio-inline\">-->\n" +
-    "            <!--<input type=\"radio\" id=\"multipleAssignments\" data-ng-model=\"multipleAssignments\" data-ng-value=\"true\">-->\n" +
-    "            <!--<label for=\"multipleAssignments\">Multiple</label>-->\n" +
-    "          <!--</div>-->\n" +
-    "        <!--</div>-->\n" +
-    "      </div>\n" +
-    "\n" +
-    "      <div class=\"form-group\" data-ng-if=\"multipleAssignments\">\n" +
-    "        <label for=\"howManyAssignments\">How many assignments?</label>\n" +
-    "        <input id=\"howManyAssignments\" class=\"form-control\" type=\"text\">\n" +
-    "      </div>\n" +
-    "\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"name\">Name</label>\n" +
-    "        <input id=\"name\" class=\"form-control\" type=\"text\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.name\">\n" +
-    "        <p data-ng-if=\"readOnly\">Super long assignment</p>\n" +
-    "      </div>\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"date\">Date</label>\n" +
-    "        <input id=\"date\" class=\"form-control\" type=\"date\"  data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.date\">\n" +
-    "        <p data-ng-if=\"readOnly\">1/1/15</p>\n" +
-    "      </div>\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"maxPoints\">Max Points</label>\n" +
-    "        <input id=\"maxPoints\" class=\"form-control\" type=\"number\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.points_possible\">\n" +
-    "        <p data-ng-if=\"readOnly\">75</p>\n" +
-    "      </div>\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"assignmentCategory\">Category</label>\n" +
-    "        <select id=\"assignmentCategory\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.category\"></select>\n" +
-    "        <p data-ng-if=\"readOnly\">Category 1</p>\n" +
-    "      </div>\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"assignmentType\">Assignment Type</label>\n" +
-    "        <select id=\"assignmentType\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.assignment_type\"></select>\n" +
-    "        <p data-ng-if=\"readOnly\">Homework</p>\n" +
-    "      </div>\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"markingPeriod\">Marking Period</label>\n" +
-    "        <select id=\"markingPeriod\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.marking_period\" data-ng-options=\"period.id as period.name for period in markingPeriodSet\">\n" +
-    "        </select>\n" +
-    "        <p data-ng-if=\"readOnly\">MAth101: Group A</p>\n" +
-    "      </div>\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"standard\">Standard</label>\n" +
-    "        <select id=\"standard\" class=\"form-control\" data-ng-if=\"!readOnly\"></select>\n" +
-    "        <p data-ng-if=\"readOnly\">Normal</p>\n" +
-    "      </div>\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"description\">Description</label>\n" +
-    "        <textarea id=\"description\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.description\"></textarea>\n" +
-    "        <p data-ng-if=\"readOnly\">Lorem ipsum dolor sitmet, conceptuir elit ascit.</p>\n" +
-    "      </div>\n" +
-    "      <button type=\"button\" class=\"btn btn-primary\" data-ng-if=\"!readOnly\" data-ng-click=\"saveAssignment()\">Add to Gradebook</button>\n" +
-    "      <button type=\"button\" class=\"btn btn-primary\" data-ng-if=\"!readOnly\" data-ng-click=\"cancel()\">Cancel</button>\n" +
-    "      <button type=\"button\" class=\"btn btn-primary\" data-ng-if=\"readOnly\" data-ng-click=\"editAssignment()\">Edit Assignment</button>\n" +
-    "    </form>\n" +
-    "  </div>\n" +
-    "\n" +
-    "  <div class=\"col-xs-3 right-settings\" data-ng-class=\"{'hidden':!filtersVisible}\">\n" +
-    "    <h2>Filters</h2>\n" +
-    "\n" +
-    "    <form>\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"currentMarkingPeriod\">Marking Period</label>\n" +
-    "        <select class=\"form-control\" id=\"currentMarkingPeriod\">\n" +
-    "        </select>\n" +
-    "      </div>\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"category\">Select Category</label>\n" +
-    "        <select class=\"form-control\" id=\"category\"></select>\n" +
-    "      </div>\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"currentAssignmentType\">Current Assignment Type</label>\n" +
-    "        <select class=\"form-control\" id=\"currentAssignmentType\"></select>\n" +
-    "      </div>\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"filterStandard\">Standard(s)</label>\n" +
-    "        <select class=\"form-control\" id=\"filterStandard\"></select>\n" +
-    "      </div>\n" +
-    "\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"studentCohort\">Student Cohort</label>\n" +
-    "        <select class=\"form-control\" id=\"studentCohort\"></select>\n" +
-    "      </div>\n" +
-    "\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label for=\"assignmentName\">Filter by Assignment Name:</label>\n" +
-    "        <input type=\"text\" id=\"assignmentName\" class=\"form-control\">\n" +
-    "      </div>\n" +
-    "\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label>Filter by Date Range</label>\n" +
-    "        <div class=\"form-inline\">\n" +
-    "          <input type=\"text\" class=\"form-control\">\n" +
-    "          to\n" +
-    "          <input type=\"text\" class=\"form-control\">\n" +
-    "        </div>\n" +
-    "      </div>\n" +
-    "      <button type=\"submit\" class=\"btn btn-primary\">Filter by Selected Options</button>\n" +
-    "      <button class=\"btn btn-primary\" data-ng-click=\"cancel()\">Close</button>\n" +
-    "    </form>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "  </div>\n" +
-    "\n" +
-    "  <div class=\"col-xs-3 right-settings\" data-ng-class=\"{'hidden':!settingsVisible}\">\n" +
-    "    <h2>Settings</h2>\n" +
-    "\n" +
-    "    <div class=\"form-group clearfix\" data-ng-init=\"settings.position = 'left'\">\n" +
-    "      <label>Final Grades Position</label>\n" +
-    "      <div class=\"col-xs-12 two-states\">\n" +
-    "        <button class=\"col-xs-6 btn btn-default\" data-ng-class=\"{'btn-primary': settings.position == 'left'}\" data-ng-click=\"settings.position = 'left'\">Left</button>\n" +
-    "        <button class=\"col-xs-6 btn btn-default\" data-ng-class=\"{'btn-primary': settings.position == 'right'}\" data-ng-click=\"settings.position = 'right'\">Right</button>\n" +
-    "      </div>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div class=\"form-group clearfix\" data-ng-init=\"settings.sort = 'newest'\">\n" +
-    "      <label>Sort Entries</label>\n" +
-    "\n" +
-    "      <div class=\"col-xs-12\">\n" +
-    "\n" +
-    "        <div class=\"radio\">\n" +
-    "          <label>\n" +
-    "            <input type=\"radio\" value=\"1\" name=\"optionsRadios\">\n" +
-    "            Date\n" +
-    "          </label>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"radio\">\n" +
-    "          <label>\n" +
-    "            <input type=\"radio\" value=\"2\" name=\"optionsRadios\">\n" +
-    "            Name\n" +
-    "          </label>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"radio\">\n" +
-    "          <label>\n" +
-    "            <input type=\"radio\" value=\"3\" name=\"optionsRadios\">\n" +
-    "            Category\n" +
-    "          </label>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"radio\">\n" +
-    "          <label>\n" +
-    "            <input type=\"radio\" value=\"4\" name=\"optionsRadios\">\n" +
-    "            Assignment Type\n" +
-    "          </label>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"radio\">\n" +
-    "          <label>\n" +
-    "            <input type=\"radio\" value=\"5\" name=\"optionsRadios\">\n" +
-    "            Standard\n" +
-    "          </label>\n" +
-    "        </div>\n" +
-    "\n" +
-    "      </div>\n" +
-    "\n" +
-    "      <div class=\"col-xs-12 two-states\">\n" +
-    "        <button class=\"col-xs-6 btn btn-default\" data-ng-class=\"{'btn-primary': settings.sort == 'oldest'}\" data-ng-click=\"settings.sort = 'oldest'\">Oldest First</button>\n" +
-    "        <button class=\"col-xs-6 btn btn-default\" data-ng-class=\"{'btn-primary': settings.sort == 'newest'}\" data-ng-click=\"settings.sort = 'newest'\">Newest First</button>\n" +
-    "      </div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div class=\"form-group clearfix\">\n" +
-    "      <div class=\"checkbox\">\n" +
-    "        <label>\n" +
-    "          <input type=\"checkbox\" value=\"\" name=\"largeScreen\">\n" +
-    "          Always Show Right Sidebar on Large Screens\n" +
-    "        </label>\n" +
-    "      </div>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div class=\"form-group clearfix\">\n" +
-    "      <label>Colored headers</label>\n" +
-    "      <div class=\"col-xs-12\">\n" +
-    "\n" +
-    "        <div class=\"radio\">\n" +
-    "          <label>\n" +
-    "            <input type=\"radio\" value=\"category\" data-ng-model=\"settings.colorHeaders.type\" name=\"coloredHeaders\">\n" +
-    "            By Category\n" +
-    "          </label>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"radio\">\n" +
-    "          <label>\n" +
-    "            <input type=\"radio\" value=\"name\"  data-ng-model=\"settings.colorHeaders.type\" name=\"coloredHeaders\">\n" +
-    "            By Name\n" +
-    "          </label>\n" +
-    "        </div>\n" +
-    "        <div class=\"col-xs-12\" data-ng-if=\"settings.colorHeaders.type == 'name'\">\n" +
-    "          <div class=\"checkbox\">\n" +
-    "            <label>\n" +
-    "              <input type=\"checkbox\" value=\"\">\n" +
-    "              <span class=\"color-checker pink\"></span>\n" +
-    "              <span class=\"pull-right\">Precission and Accuracy</span>\n" +
-    "            </label>\n" +
-    "          </div>\n" +
-    "\n" +
-    "          <div class=\"checkbox\">\n" +
-    "            <label>\n" +
-    "              <input type=\"checkbox\" value=\"\">\n" +
-    "              <span class=\"color-checker green\"></span>\n" +
-    "\n" +
-    "              <span class=\"pull-right\">Standards</span>\n" +
-    "            </label>\n" +
-    "          </div>\n" +
-    "\n" +
-    "          <div class=\"checkbox\">\n" +
-    "            <label>\n" +
-    "              <input type=\"checkbox\" value=\"\">\n" +
-    "              <span class=\"color-checker orange\"></span>\n" +
-    "\n" +
-    "              <span class=\"pull-right\">Engagement</span>\n" +
-    "            </label>\n" +
-    "          </div>\n" +
-    "\n" +
-    "          <div class=\"checkbox\">\n" +
-    "            <label>\n" +
-    "              <input type=\"checkbox\" value=\"\" >\n" +
-    "              <span class=\"color-checker blue\"></span>\n" +
-    "              <span class=\"pull-right\">Assignment Competition</span>\n" +
-    "            </label>\n" +
-    "          </div>\n" +
-    "\n" +
-    "          <div class=\"checkbox\">\n" +
-    "            <label>\n" +
-    "              <input type=\"checkbox\" value=\"\" >\n" +
-    "              <span class=\"color-checker red\"></span>\n" +
-    "              <span class=\"pull-right\">Daily practice</span>\n" +
-    "            </label>\n" +
-    "          </div>\n" +
-    "\n" +
-    "        </div>\n" +
-    "\n" +
-    "\n" +
-    "        <div class=\"radio pull-left\">\n" +
-    "          <label>\n" +
-    "            <input type=\"radio\" value=\"assignmentType\"  data-ng-model=\"settings.colorHeaders.type\" name=\"coloredHeaders\">\n" +
-    "            By Assignment Type\n" +
-    "          </label>\n" +
-    "        </div>\n" +
-    "\n" +
-    "\n" +
-    "      </div>\n" +
-    "\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div class=\"form-group clearfix\">\n" +
-    "      <label>Show in header cells</label>\n" +
-    "      <div class=\"col-xs-12\">\n" +
-    "\n" +
-    "        <div class=\"checkbox\">\n" +
-    "          <label>\n" +
-    "            <input type=\"checkbox\" value=\"\">\n" +
-    "            Category\n" +
-    "          </label>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"checkbox\">\n" +
-    "          <label>\n" +
-    "            <input type=\"checkbox\" value=\"\">\n" +
-    "            Assignment Type\n" +
-    "          </label>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"checkbox\">\n" +
-    "          <label>\n" +
-    "            <input type=\"checkbox\" value=\"\">\n" +
-    "            Name\n" +
-    "          </label>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"checkbox\">\n" +
-    "          <label>\n" +
-    "            <input type=\"checkbox\" value=\"\" >\n" +
-    "            Standard\n" +
-    "          </label>\n" +
-    "        </div>\n" +
-    "\n" +
-    "      </div>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div class=\"form-group clearfix\">\n" +
-    "      <label>Grade input method</label>\n" +
-    "      <p>Schooldriver Gradebook <a data-ng-click=\"\">(change)</a></p>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div class=\"form-group clearfix\">\n" +
-    "      <label>Display names</label>\n" +
-    "      <p>First Last <a data-ng-click=\"\">(change)</a></p>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <button class=\"btn btn-primary\" data-ng-click=\"cancel()\">Close</button>\n" +
-    "  </div>\n" +
-    "\n" +
-    "  <div class=\"col-xs-3 right-settings\" data-ng-class=\"{'hidden': !colorGuideVisible}\">\n" +
-    "    <h2>Icon/Color Guide</h2>\n" +
-    "\n" +
-    "    <dl class=\"dl-horizontal\">\n" +
-    "\n" +
-    "      <dt data-ng-click=\"showNotificationDescription('saving')\"><i class=\"fa fa-spinner\"></i></dt>\n" +
-    "      <dd data-ng-click=\"showNotificationDescription('saving')\">Data is saving</dd>\n" +
-    "\n" +
-    "      <dt data-ng-click=\"showNotificationDescription('general')\"><i class=\"fa fa-flag\"></i></dt>\n" +
-    "      <dd data-ng-click=\"showNotificationDescription('general')\">General notification</dd>\n" +
-    "\n" +
-    "      <dt data-ng-click=\"showNotificationDescription('error')\"><i class=\"fa fa-times-circle\"></i></dt>\n" +
-    "      <dd data-ng-click=\"showNotificationDescription('error')\">Error notification</dd>\n" +
-    "\n" +
-    "    </dl>\n" +
-    "\n" +
-    "    <i>Click the notification to get more information.</i>\n" +
-    "\n" +
-    "    <button class=\"btn btn-primary\" data-ng-click=\"cancel()\">Close</button>\n" +
-    "  </div>\n" +
-    "\n" +
-    "  <div class=\"col-xs-3 right-settings\" data-ng-class=\"{'hidden': !notificationVisible}\">\n" +
-    "    <div data-ng-if=\"notificationType === 'saving'\">\n" +
-    "      <h2><i class=\"fa fa-spinner\"></i> Data is saving</h2>\n" +
-    "      <p>sda dasd asdadadasd asdasdasd asdasdad asdada</p>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div data-ng-if=\"notificationType === 'general'\">\n" +
-    "      <h2><i class=\"fa fa-flag\"></i> Possible input error</h2>\n" +
-    "      <p>Max points for this entry is 10, but you entered 100. This may be incorrec</p>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div data-ng-if=\"notificationType === 'error'\">\n" +
-    "      <h2><i class=\"fa fa-times-circle\"></i> Lorem Ipsum</h2>\n" +
-    "      <p>sdad asdasdasdas dasdasdada dasdasdad asdasda</p>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <button class=\"btn btn-primary\" data-ng-click=\"showIconsGuide()\">Back</button>\n" +
-    "    <button class=\"btn btn-primary\" data-ng-click=\"cancel()\">Close</button>\n" +
-    "\n" +
-    "  </div>\n" +
-    "\n" +
-    "</div>\n" +
-    "");
+angular.module("studentGrades/classSectionList/classSectionList.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("studentGrades/classSectionList/classSectionList.html",
+    "<div class=\"row\"><h2>Student grades</h2></div><div class=\"row\"><h3>Please select teacher and year</h3></div><div class=\"row field\"><label class=\"inline one column year-teacher\">Year</label><div class=\"picker two columns\"><select ng-model=\"select.year\" ng-options=\"year as year for year in years\"><option value=\"\">Select year</option></select></div></div><div class=\"row field\"><label class=\"inline one column year-teacher\">Teacher</label><div class=\"picker two columns\"><select ng-model=\"select.teacher\" ng-options=\"teacher for teacher in teachers\"><option value=\"\">Select teacher</option></select></div></div><div class=\"row\" ng-if=\"select.teacher && select.year\"><h3>select a class section to edit grades</h3><table class=\"rounded\"><thead><tr><th>CLASSES</th><th>SECTIONS</th></tr></thead><tbody ng-repeat=\"classSection in classSectionList\"><tr ng-repeat=\"section in classSection.sections\"><td rowspan=\"{{classSection.sections.length}}\" ng-if=\"$index == 0\">{{classSection.name}}</td><td><a ng-href=\"#/students/classSections/{{section.id}}\">{{section.name}}</a></td></tr></tbody></table></div>");
+}]);
+
+angular.module("studentGrades/singleSection/_addNewAssignment.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("studentGrades/singleSection/_addNewAssignment.html",
+    "<div class=\"modal active\"><div class=\"content\"><div class=\"modal-header\"><h2 class=\"modal-title text-center\">Add new assignment</h2></div><div class=\"modal-body\"><form class=\"form-horizontal\"><div class=\"row field\"><label class=\"inline two columns year-teacher\">Name</label><div class=\"seven columns\"><input type=\"text\" style=\"width: 100%\" class=\"input\" ng-model=\"assignment.name\" placeholder=\"enter assignment title name\"></div></div><div class=\"row field\"><label class=\"two columns inline year-teacher\">Weight</label><div class=\"seven columns\"><input type=\"text\" style=\"width: 100%\" class=\"input\" ng-model=\"assignment.weight\" placeholder=\"enter assignment weight as a percentage\"></div></div><div class=\"row\"><label class=\"two columns inline year-teacher\">Category</label><div class=\"seven columns picker\"><select class=\"form-control\" ng-model=\"assignment.category\" ng-options=\"category.id as category.name for category in categories\"><option value=\"\">Select category</option></select></div></div></form></div><div class=\"row\"><div class=\"ten columns centered text-center\"><div class=\"btn primary medium\"><a ng-click=\"ok()\">OK</a></div><div class=\"btn warning medium\"><a ng-click=\"cancel()\">Cancel</a></div></div></div></div></div>");
+}]);
+
+angular.module("studentGrades/singleSection/_adjustGradeSettings.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("studentGrades/singleSection/_adjustGradeSettings.html",
+    "<div class=\"modal active\"><div class=\"content\"><div class=\"modal-header\"><h2 class=\"modal-title text-center\">Adjust grade settings</h2></div><div class=\"modal-body\"><form class=\"form-horizontal\"><div class=\"row field\" ng-repeat=\"assignment in assignments\"><label class=\"inline three columns year-teacher\">{{assignment.name}}</label><div class=\"three columns append\"><input type=\"text\" class=\"input text-right\" style=\"margin-top: -2px\" ng-model=\"assignment.weight\" placeholder=\"enter weight\"> <span class=\"adjoined\" id=\"basic-addon2\">%</span></div></div></form></div><div class=\"row\"><div class=\"ten columns centered text-center\"><div class=\"btn primary medium\"><a ng-click=\"ok()\">Save</a></div><div class=\"btn warning medium\"><a ng-click=\"cancel()\">Cancel</a></div></div></div></div></div>");
+}]);
+
+angular.module("studentGrades/singleSection/singleSection.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("studentGrades/singleSection/singleSection.html",
+    "<div class=\"\"><hot-table afterchange=\"afterChange\" aftergetcolheader=\"afterGetColHeader\" rowheaders=\"true\" colheaders=\"true\" datarows=\"users\" columns=\"columns\" fixedcolumnsleft=\"3\" minsparerows=\"1\" minsparecols=\"1\"></hot-table></div><div style=\"margin-top: 20px\"><div class=\"btn primary medium\"><a ng-href=\"#/students/classSections\">View courses & sections</a></div></div>");
 }]);
