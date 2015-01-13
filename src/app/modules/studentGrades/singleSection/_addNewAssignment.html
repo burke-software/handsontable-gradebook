@@ -1,30 +1,30 @@
 <div class="modal active">
   <div class="content">
     <div class="modal-header">
-      <h1 class="modal-title text-center">Add new assignment</h1>
+      <h2 class="modal-title text-center">Add new assignment</h2>
     </div>
     <div class="modal-body">
       <form class="form-horizontal">
-        <div class="row">
-          <label class="three columns control-label">Name</label>
+        <div class="row field">
+          <label class="inline two columns year-teacher">Name</label>
 
-          <div class="eight columns">
-            <input type="text" class="input" ng-model="assignment.name"
+          <div class="seven columns">
+            <input type="text" style="width: 100%" class="input" ng-model="assignment.name"
                    placeholder="enter assignment title name">
           </div>
         </div>
-        <div class="row">
-          <label class="three columns  control-label">Weight</label>
+        <div class="row field">
+          <label class="two columns inline year-teacher">Weight</label>
 
-          <div class="eight columns">
-            <input type="text" class="inpuy" ng-model="assignment.weight"
+          <div class="seven columns">
+            <input type="text"  style="width: 100%" class="input" ng-model="assignment.weight"
                    placeholder="enter assignment weight as a percentage">
           </div>
         </div>
         <div class="row">
-          <label class="three columns  control-label">Category</label>
+          <label class="two columns  inline year-teacher">Category</label>
 
-          <div class="eight columns">
+          <div class="seven columns picker">
             <select class="form-control" ng-model="assignment.category"
                     ng-options="category.id as category.name for category in categories">
               <option value="">Select category</option>

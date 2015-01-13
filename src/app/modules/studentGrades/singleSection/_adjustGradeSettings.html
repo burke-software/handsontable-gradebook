@@ -1,15 +1,15 @@
 <div class="modal active">
   <div class="content">
     <div class="modal-header">
-      <h1 class="modal-title text-center">Adjust grade settings</h1>
+      <h2 class="modal-title text-center">Adjust grade settings</h2>
     </div>
     <div class="modal-body">
       <form class="form-horizontal">
-        <div class="row" ng-repeat="assignment in assignments">
-          <label class="five columns control-label">{{assignment.name}}</label>
-          <div class="seven columns input-group">
-            <input type="text" class="form-control text-right" ng-model="assignment.weight" placeholder="enter weight">
-            <span class="input-group-addon" id="basic-addon2">%</span>
+        <div class="row field" ng-repeat="assignment in assignments">
+          <label class="inline three columns year-teacher">{{assignment.name}}</label>
+          <div class="three columns append">
+            <input type="text" class="input text-right" style="margin-top: -2px" ng-model="assignment.weight" placeholder="enter weight">
+            <span class="adjoined" id="basic-addon2">%</span>
           </div>
         </div>
       </form>
@@ -17,7 +17,7 @@
     <div class="row">
       <div class="ten columns centered text-center">
         <div class="btn primary medium">
-          <a ng-click="ok()">OK</a>
+          <a ng-click="ok()">Save</a>
         </div>
         <div class="btn warning medium">
           <a ng-click="cancel()">Cancel</a>
