@@ -3,9 +3,10 @@ angular.module('gradeBookApp.controllers')
   'classSectionListCtrl',
   [
     '$scope',
-    'classSectionFactory',
+    'classSectionFactory',  // <- REMOVE
+    'sectionFactory',
     '$log',
-    function ($scope, classSectionFactory, $log) {
+    function ($scope, classSectionFactory, sectionFactory,$log) {
 
       $scope.classSectionList = [];
 
@@ -38,17 +39,22 @@ angular.module('gradeBookApp.controllers')
       createYears();
 
       var getClassSectionList = function () {
-        classSectionFactory.get().$promise.then(
-          function (result){
-            $scope.classSectionList = result;
-          },
-          function (error) {
-            $log.error('classSectionListCtrl:getClassSectionList', error);
+        sectionFactory.get().$promise.then(
+          function (result) {
+            console.log(result);
           }
-        )
+        );
+
+        //classSectionFactory.get().$promise.then(
+        //  function (result){
+        //    $scope.classSectionList = result;
+        //  },
+        //  function (error) {
+        //    $log.error('classSectionListCtrl:getClassSectionList', error);
+        //  }
+        //)
       };
 
-      //getClassSectionList();
 
     }
   ]

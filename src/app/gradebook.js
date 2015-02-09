@@ -17,7 +17,7 @@ angular.module('gradeBookApp', [
     function ($provide, $routeProvider) {
       $provide.factory('appConfig', function () {
         return {
-          apiUrl: ''
+          apiUrl: 'http://192.168.59.103:8000/api/'
         }
       });
 
@@ -54,6 +54,14 @@ angular.module('gradeBookApp', [
         .otherwise({
           redirectTo: '/students/classSections'
         });
+    }
+  ]
+).run(
+  [
+    '$http',
+    '$cookies',
+    function ($http,$cookies){
+      $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
     }
   ]
 );

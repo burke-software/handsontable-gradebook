@@ -1,13 +1,13 @@
 angular.module('gradeBookApp.services')
   .factory(
-  'assignmentFactory',
+  'sectionFactory',
   [
     'appConfig',
     '$resource',
     function (appConfig, $resource) {
-      return $resource(appConfig.apiUrl + '/assignments/:assignmentId/ ',
+      return $resource(appConfig.apiUrl + 'sections/:sectionId/ ',
         {
-          assignmentId: '@assignmentId'
+          sectionId: '@sectionId'
         },
         {
           create: {

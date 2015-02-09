@@ -13,7 +13,7 @@
     "bootstrap": "3.3.1",
     "angular-bootstrap": "0.12.0",
     "angular-translate": "2.4.2",
-    "nghandsontable": "develop",
+    "nghandsontable": "",
     "gumby": "~2.6.3",
     "fontawesome": "~4.2.0"
   },
