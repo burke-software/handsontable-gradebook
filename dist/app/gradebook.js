@@ -22,28 +22,7 @@ angular.module('gradeBookApp', [
       });
 
       $routeProvider.
-        when('/login', {
-
-        })
-        .when('/students',{
-
-        })
-        .when('/attendance',{
-
-        })
-        .when('/courses',{
-
-        })
-        .when('/cswp',{
-
-        })
-        .when('/discipline',{
-
-        })
-        .when('/counseling',{
-
-        })
-        .when('/students/classSections',{
+        when('/students/classSections',{
           controller: 'classSectionListCtrl',
           templateUrl: 'studentGrades/classSectionList/classSectionList.html'
         })
@@ -918,6 +897,30 @@ angular.module('gradeBookApp.services')
   ]
 );
 
+angular.module('gradeBookApp.services')
+  .factory(
+  'coursesFactory',
+  [
+    'appConfig',
+    '$resource',
+    function (appConfig, $resource) {
+      return $resource(appConfig.apiUrl + '/courses/:courseId/ ',
+        {
+          courseId: '@courseId'
+        },
+        {
+          create: {
+            method: 'POST'
+          },
+          update: {
+            method: 'PUT'
+          }
+        }
+      )
+    }
+  ]
+);
+
 /**
  * Created by jkl on 05.01.15.
  */
@@ -927,32 +930,20 @@ angular.module('gradeBookApp.services')
   [
     'appConfig',
     '$resource',
-    '$log',
-    function (appConfig, $resource, $log) {
-      return $resource(appConfig.apiUrl + '/grade/:gradeId/ ',
+    function (appConfig, $resource) {
+      return $resource(appConfig.apiUrl + '/grades/:gradeId/ ',
         {
           gradeId: '@gradeId'
         },
         {
           create: {
-            method: 'POST',
-            interceptor: {
-              responseError: function (error) {
-                $log.error('ADD NEW GRADE:', error)
-                return {
+            method: 'POST'
 
-                }
-              }
-            }
           },
 
           update: {
-            method: 'PUT',
-            interceptor: {
-              responseError: function (error) {
-                $log.error('UPDATE EXISTING GRADE:', error);
-              }
-            }
+            method: 'PUT'
+
           }
         }
       )

@@ -22,28 +22,7 @@ angular.module('gradeBookApp', [
       });
 
       $routeProvider.
-        when('/login', {
-
-        })
-        .when('/students',{
-
-        })
-        .when('/attendance',{
-
-        })
-        .when('/courses',{
-
-        })
-        .when('/cswp',{
-
-        })
-        .when('/discipline',{
-
-        })
-        .when('/counseling',{
-
-        })
-        .when('/students/classSections',{
+        when('/students/classSections',{
           controller: 'classSectionListCtrl',
           templateUrl: 'studentGrades/classSectionList/classSectionList.html'
         })
