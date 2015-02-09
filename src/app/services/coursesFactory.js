@@ -1,26 +1,20 @@
-/**
- * Created by jkl on 05.01.15.
- */
 angular.module('gradeBookApp.services')
   .factory(
-  'gradeFactory',
+  'coursesFactory',
   [
     'appConfig',
     '$resource',
     function (appConfig, $resource) {
-      return $resource(appConfig.apiUrl + '/grades/:gradeId/ ',
+      return $resource(appConfig.apiUrl + '/courses/:courseId/ ',
         {
-          gradeId: '@gradeId'
+          courseId: '@courseId'
         },
         {
           create: {
             method: 'POST'
-
           },
-
           update: {
             method: 'PUT'
-
           }
         }
       )
