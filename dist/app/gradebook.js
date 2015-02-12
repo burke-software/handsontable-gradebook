@@ -128,6 +128,7 @@ angular.module('gradeBookApp.controllers')
         return;
       }
 
+
       $scope.originalDataSource = [];
       $scope.users = [];
       $scope.columns = [];
@@ -547,6 +548,7 @@ angular.module('gradeBookApp.services')
           assignmentId: '@assignmentId'
         },
         {
+          
           create: {
             method: 'POST'
           },
@@ -961,6 +963,10 @@ angular.module('gradeBookApp.services')
           sectionId: '@sectionId'
         },
         {
+          get: {
+            isArray: true
+          },
+
           create: {
             method: 'POST'
           },

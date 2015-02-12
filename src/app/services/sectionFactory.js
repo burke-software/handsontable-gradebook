@@ -13,6 +13,7 @@ angular.module('gradeBookApp.services')
           get: {
             isArray: true
           },
+
           create: {
             method: 'POST'
           },
