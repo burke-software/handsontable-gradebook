@@ -157,33 +157,14 @@ module.exports = function (grunt) {
   grunt.registerTask('default', [
     "html2js",
     "sass",
-    "replace:dist",
     "concat",
-    "copy",
     "clean"
   ]);
 
-  //grunt.registerTask('default', [
-  //  "copy:conf",
-  //  "dist"
-  //]);
-
-  //grunt.registerTask('build', [
-  //  "mkdir",
-  //  "dist"
-  //]);
-
-	//grunt.registerTask('default', ['html2js', 'sass', 'concat', 'clean']);
-	//grunt.registerTask('build', ['default', 'copy', 'uglify']);
-
-  grunt.loadNpmTasks('grunt-contrib-concat');
-	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-contrib-connect');
-	grunt.loadNpmTasks('grunt-html2js');
+  grunt.loadNpmTasks('grunt-html2js');
 	grunt.loadNpmTasks('grunt-contrib-sass');
-	grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-replace');
 
 };
