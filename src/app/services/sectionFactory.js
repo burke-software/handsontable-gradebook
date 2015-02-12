@@ -10,6 +10,9 @@ angular.module('gradeBookApp.services')
           sectionId: '@sectionId'
         },
         {
+          get: {
+            isArray: true
+          },
           create: {
             method: 'POST'
           },

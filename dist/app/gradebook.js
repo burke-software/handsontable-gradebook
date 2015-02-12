@@ -44,8 +44,6 @@ angular.module('gradeBookApp', [
     }
   ]
 );
-
-
 angular.module('gradeBookApp.services', []);
 angular.module('gradeBookApp.controllers',[]);
 

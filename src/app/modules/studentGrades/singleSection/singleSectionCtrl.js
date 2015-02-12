@@ -17,6 +17,7 @@ angular.module('gradeBookApp.controllers')
         return;
       }
 
+
       $scope.originalDataSource = [];
       $scope.users = [];
       $scope.columns = [];
