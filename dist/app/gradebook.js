@@ -896,9 +896,6 @@ angular.module('gradeBookApp.services')
           courseId: '@courseId'
         },
         {
-          get: {
-            isArray: true
-          },
           create: {
             method: 'POST'
           },
