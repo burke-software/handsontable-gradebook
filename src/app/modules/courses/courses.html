@@ -42,7 +42,7 @@
     <tr ng-repeat="section in course.sections">
       <td rowspan="{{course.sections.length}}" ng-if="$index == 0">{{course.fullname}}</td>
       <td>
-        <a ng-href="#/gradebook/sections/{{section.id}}">{{section.name}}</a>
+        <a ng-href="/gradebook/sections/{{section.id}}">{{section.name}}</a>
       </td>
     </tr>
     </tbody>
