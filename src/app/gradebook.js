@@ -23,12 +23,12 @@ angular.module('gradeBookApp', [
 
       $routeProvider.
         when('/gradebook/',{
-          controller: 'classSectionListCtrl',
-          templateUrl: 'studentGrades/classSectionList/classSectionList.html'
+          controller: 'coursesCtrl',
+          templateUrl: 'courses/courses.html'
         })
-        .when('/gradebook/classSections/:sectionId',{
+        .when('/gradebook/sections/:sectionId',{
           controller: 'singleSectionCtrl',
-          templateUrl: 'studentGrades/singleSection/singleSection.html'
+          templateUrl: 'singleSection/singleSection.html'
         })
         .otherwise({
           redirectTo: '/gradebook/'

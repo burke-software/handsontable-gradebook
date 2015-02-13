@@ -38,11 +38,11 @@
       </th>
     </tr>
     </thead>
-    <tbody ng-repeat="classSection in classSectionList">
-    <tr ng-repeat="section in classSection.sections">
-      <td rowspan="{{classSection.sections.length}}" ng-if="$index == 0">{{classSection.name}}</td>
+    <tbody ng-repeat="course in courses">
+    <tr ng-repeat="section in course.sections">
+      <td rowspan="{{course.sections.length}}" ng-if="$index == 0">{{course.fullname}}</td>
       <td>
-        <a ng-href="#/students/classSections/{{section.id}}">{{section.name}}</a>
+        <a ng-href="#/gradebook/sections/{{section.id}}">{{section.name}}</a>
       </td>
     </tr>
     </tbody>

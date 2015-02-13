@@ -23,12 +23,12 @@ angular.module('gradeBookApp', [
 
       $routeProvider.
         when('/gradebook/',{
-          controller: 'classSectionListCtrl',
-          templateUrl: 'studentGrades/classSectionList/classSectionList.html'
+          controller: 'coursesCtrl',
+          templateUrl: 'courses/courses.html'
         })
-        .when('/gradebook/classSections/:sectionId',{
+        .when('/gradebook/sections/:sectionId',{
           controller: 'singleSectionCtrl',
-          templateUrl: 'studentGrades/singleSection/singleSection.html'
+          templateUrl: 'singleSection/singleSection.html'
         })
         .otherwise({
           redirectTo: '/gradebook/'
@@ -49,13 +49,13 @@ angular.module('gradeBookApp.controllers',[]);
 
 angular.module('gradeBookApp.controllers')
   .controller(
-  'classSectionListCtrl',
+  'coursesCtrl',
   [
     '$scope',
     'courseFactory',
     function ($scope,  courseFactory) {
 
-      $scope.classSectionList = [];
+      $scope.courses = [];
 
       $scope.select = {};
 
@@ -88,7 +88,7 @@ angular.module('gradeBookApp.controllers')
       var getCourses = function () {
         courseFactory.get().$promise.then(
           function (result) {
-            console.log(result);
+            $scope.courses = result['results'];
           }
         )
       };
@@ -1019,24 +1019,24 @@ angular.module('gradeBookApp.services')
   ]
 );
 
-angular.module('gradeBookApp.templates', ['studentGrades/classSectionList/classSectionList.html', 'studentGrades/singleSection/_addNewAssignment.html', 'studentGrades/singleSection/_adjustGradeSettings.html', 'studentGrades/singleSection/singleSection.html']);
+angular.module('gradeBookApp.templates', ['courses/courses.html', 'singleSection/_addNewAssignment.html', 'singleSection/_adjustGradeSettings.html', 'singleSection/singleSection.html']);
 
-angular.module("studentGrades/classSectionList/classSectionList.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("studentGrades/classSectionList/classSectionList.html",
-    "<div class=\"row\"><h2>Student grades</h2></div><div class=\"row\"><h3>Please select teacher and year</h3></div><div class=\"row field\"><label class=\"inline one column year-teacher\">Year</label><div class=\"picker two columns\"><select ng-model=\"select.year\" ng-options=\"year as year for year in years\"><option value=\"\">Select year</option></select></div></div><div class=\"row field\"><label class=\"inline one column year-teacher\">Teacher</label><div class=\"picker two columns\"><select ng-model=\"select.teacher\" ng-options=\"teacher for teacher in teachers\"><option value=\"\">Select teacher</option></select></div></div><div class=\"row\" ng-if=\"select.teacher && select.year\"><h3>select a class section to edit grades</h3><table class=\"rounded\"><thead><tr><th>CLASSES</th><th>SECTIONS</th></tr></thead><tbody ng-repeat=\"classSection in classSectionList\"><tr ng-repeat=\"section in classSection.sections\"><td rowspan=\"{{classSection.sections.length}}\" ng-if=\"$index == 0\">{{classSection.name}}</td><td><a ng-href=\"#/students/classSections/{{section.id}}\">{{section.name}}</a></td></tr></tbody></table></div>");
+angular.module("courses/courses.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("courses/courses.html",
+    "<div class=\"row\"><h2>Student grades</h2></div><div class=\"row\"><h3>Please select teacher and year</h3></div><div class=\"row field\"><label class=\"inline one column year-teacher\">Year</label><div class=\"picker two columns\"><select ng-model=\"select.year\" ng-options=\"year as year for year in years\"><option value=\"\">Select year</option></select></div></div><div class=\"row field\"><label class=\"inline one column year-teacher\">Teacher</label><div class=\"picker two columns\"><select ng-model=\"select.teacher\" ng-options=\"teacher for teacher in teachers\"><option value=\"\">Select teacher</option></select></div></div><div class=\"row\" ng-if=\"select.teacher && select.year\"><h3>select a class section to edit grades</h3><table class=\"rounded\"><thead><tr><th>CLASSES</th><th>SECTIONS</th></tr></thead><tbody ng-repeat=\"course in courses\"><tr ng-repeat=\"section in course.sections\"><td rowspan=\"{{course.sections.length}}\" ng-if=\"$index == 0\">{{course.fullname}}</td><td><a ng-href=\"#/gradebook/sections/{{section.id}}\">{{section.name}}</a></td></tr></tbody></table></div>");
 }]);
 
-angular.module("studentGrades/singleSection/_addNewAssignment.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("studentGrades/singleSection/_addNewAssignment.html",
+angular.module("singleSection/_addNewAssignment.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("singleSection/_addNewAssignment.html",
     "<div class=\"modal active\"><div class=\"content\"><div class=\"modal-header\"><h2 class=\"modal-title text-center\">Add new assignment</h2></div><div class=\"modal-body\"><form class=\"form-horizontal\"><div class=\"row field\"><label class=\"inline two columns year-teacher\">Name</label><div class=\"seven columns\"><input type=\"text\" style=\"width: 100%\" class=\"input\" ng-model=\"assignment.name\" placeholder=\"enter assignment title name\"></div></div><div class=\"row field\"><label class=\"two columns inline year-teacher\">Weight</label><div class=\"seven columns\"><input type=\"text\" style=\"width: 100%\" class=\"input\" ng-model=\"assignment.weight\" placeholder=\"enter assignment weight as a percentage\"></div></div><div class=\"row\"><label class=\"two columns inline year-teacher\">Category</label><div class=\"seven columns picker\"><select class=\"form-control\" ng-model=\"assignment.category\" ng-options=\"category.id as category.name for category in categories\"><option value=\"\">Select category</option></select></div></div></form></div><div class=\"row\"><div class=\"ten columns centered text-center\"><div class=\"btn primary medium\"><a ng-click=\"ok()\">OK</a></div><div class=\"btn warning medium\"><a ng-click=\"cancel()\">Cancel</a></div></div></div></div></div>");
 }]);
 
-angular.module("studentGrades/singleSection/_adjustGradeSettings.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("studentGrades/singleSection/_adjustGradeSettings.html",
+angular.module("singleSection/_adjustGradeSettings.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("singleSection/_adjustGradeSettings.html",
     "<div class=\"modal active\"><div class=\"content\"><div class=\"modal-header\"><h2 class=\"modal-title text-center\">Adjust grade settings</h2></div><div class=\"modal-body\"><form class=\"form-horizontal\"><div class=\"row field\" ng-repeat=\"assignment in assignments\"><label class=\"inline three columns year-teacher\">{{assignment.name}}</label><div class=\"three columns append\"><input type=\"text\" class=\"input text-right\" style=\"margin-top: -2px\" ng-model=\"assignment.weight\" placeholder=\"enter weight\"> <span class=\"adjoined\" id=\"basic-addon2\">%</span></div></div></form></div><div class=\"row\"><div class=\"ten columns centered text-center\"><div class=\"btn primary medium\"><a ng-click=\"ok()\">Save</a></div><div class=\"btn warning medium\"><a ng-click=\"cancel()\">Cancel</a></div></div></div></div></div>");
 }]);
 
-angular.module("studentGrades/singleSection/singleSection.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("studentGrades/singleSection/singleSection.html",
+angular.module("singleSection/singleSection.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("singleSection/singleSection.html",
     "<div class=\"\"><hot-table afterchange=\"afterChange\" aftergetcolheader=\"afterGetColHeader\" rowheaders=\"true\" colheaders=\"true\" datarows=\"users\" columns=\"columns\" fixedcolumnsleft=\"3\" minsparerows=\"1\" minsparecols=\"1\"></hot-table></div><div style=\"margin-top: 20px\"><div class=\"btn primary medium\"><a ng-href=\"#/students/classSections\">View courses & sections</a></div></div>");
 }]);

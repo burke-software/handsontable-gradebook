@@ -1,12 +1,12 @@
 angular.module('gradeBookApp.controllers')
   .controller(
-  'classSectionListCtrl',
+  'coursesCtrl',
   [
     '$scope',
     'courseFactory',
     function ($scope,  courseFactory) {
 
-      $scope.classSectionList = [];
+      $scope.courses = [];
 
       $scope.select = {};
 
@@ -39,7 +39,7 @@ angular.module('gradeBookApp.controllers')
       var getCourses = function () {
         courseFactory.get().$promise.then(
           function (result) {
-            console.log(result);
+            $scope.courses = result['results'];
           }
         )
       };
