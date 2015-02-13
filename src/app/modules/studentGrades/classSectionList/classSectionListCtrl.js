@@ -3,9 +3,8 @@ angular.module('gradeBookApp.controllers')
   'classSectionListCtrl',
   [
     '$scope',
-    'sectionFactory',
     'courseFactory',
-    function ($scope, classSectionFactory, sectionFactory) {
+    function ($scope,  courseFactory) {
 
       $scope.classSectionList = [];
 
