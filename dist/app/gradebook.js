@@ -52,10 +52,8 @@ angular.module('gradeBookApp.controllers')
   'classSectionListCtrl',
   [
     '$scope',
-    'classSectionFactory',  // <- REMOVE
-    'sectionFactory',
-    '$log',
-    function ($scope, classSectionFactory, sectionFactory,$log) {
+    'courseFactory',
+    function ($scope,  courseFactory) {
 
       $scope.classSectionList = [];
 
@@ -69,13 +67,13 @@ angular.module('gradeBookApp.controllers')
 
       $scope.$watch('select.teacher',function () {
         if ($scope.select.year && $scope.select.teacher) {
-          getClassSectionList();
+          getCourses();
         }
       });
 
       $scope.$watch('select.year',function () {
         if ($scope.select.year && $scope.select.teacher) {
-          getClassSectionList();
+          getCourses();
         }
       });
 
@@ -87,24 +85,13 @@ angular.module('gradeBookApp.controllers')
 
       createYears();
 
-      var getClassSectionList = function () {
-        sectionFactory.get().$promise.then(
+      var getCourses = function () {
+        courseFactory.get().$promise.then(
           function (result) {
             console.log(result);
           }
-        );
-
-        //classSectionFactory.get().$promise.then(
-        //  function (result){
-        //    $scope.classSectionList = result;
-        //  },
-        //  function (error) {
-        //    $log.error('classSectionListCtrl:getClassSectionList', error);
-        //  }
-        //)
+        )
       };
-
-
     }
   ]
 );
@@ -899,7 +886,7 @@ angular.module('gradeBookApp.services')
 
 angular.module('gradeBookApp.services')
   .factory(
-  'coursesFactory',
+  'courseFactory',
   [
     'appConfig',
     '$resource',
@@ -909,6 +896,9 @@ angular.module('gradeBookApp.services')
           courseId: '@courseId'
         },
         {
+          get: {
+            isArray: true
+          },
           create: {
             method: 'POST'
           },
@@ -963,10 +953,10 @@ angular.module('gradeBookApp.services')
           sectionId: '@sectionId'
         },
         {
+          //TEST IF IT WORKS
           get: {
             isArray: true
           },
-
           create: {
             method: 'POST'
           },
