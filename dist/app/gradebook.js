@@ -29,10 +29,8 @@ angular.module('gradeBookApp', [
         .when('/gradebook/sections/:sectionId',{
           controller: 'singleSectionCtrl',
           templateUrl: 'singleSection/singleSection.html'
-        })
-        .otherwise({
-          redirectTo: '/gradebook/'
         });
+
     }
   ]
 ).run(
