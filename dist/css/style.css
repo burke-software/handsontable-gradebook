@@ -9,21 +9,26 @@
   border-radius: 0; }
 #gradebook .form-control {
   border-radius: 0; }
+#gradebook .handsontable-container {
+  margin-top: 20px; }
 #gradebook .handsontable th {
   background: #fff; }
 #gradebook .handsontable .handsontable table {
   box-shadow: none;
   -webkit-box-shadow: none; }
-#gradebook .ht_clone_corner tr th:first-child {
-  background: red; }
+#gradebook .ht_clone_corner thead th div {
+  font-weight: bold; }
 #gradebook table thead tr th {
   border-left: 0;
-  border-bottom: 1px solid #ccc; }
+  box-sizing: border-box;
+  border-bottom: 1px solid #ccc;
+  border-top: 1px solid #ccc; }
 #gradebook .ht_clone_corner tr th:first-child,
 #gradebook table tbody tr th:first-child {
   background: #fff;
   border-bottom-color: #fff;
-  border-left-color: #fff; }
+  border-left-color: #fff;
+  border-top-color: #fff; }
 
 .handsontableInput {
   box-sizing: content-box; }
