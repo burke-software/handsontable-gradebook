@@ -22,7 +22,11 @@ angular.module('gradeBookApp', [
       });
 
       $routeProvider.
-        when('/gradebook/',{
+        when('/test',{
+          controller: 'gradeBookCtrl',
+          templateUrl: 'gradebook/gradebook.html'
+        })
+        .when('/gradebook/',{
           controller: 'coursesCtrl',
           templateUrl: 'courses/courses.html'
         })
@@ -90,6 +94,59 @@ angular.module('gradeBookApp.controllers')
           }
         )
       };
+    }
+  ]
+);
+
+angular.module('gradeBookApp.controllers')
+.controller(
+  'gradeBookCtrl',
+  [
+    '$scope',
+    'courseFactory',
+    'classSectionFactory',
+    '$log',
+    function ($scope, courseFactory, classSectionFactory, $log) {
+
+      var getCourses = function () {
+        courseFactory.get().$promise.then(
+          function (result) {
+            $scope.courses = result['results'];
+          }
+        )
+      };
+
+      $scope.getSection = function (sectionId) {
+        $scope.activeSection = sectionId;
+        classSectionFactory.getBySection({sectionId: sectionId}).$promise.then(
+          function (result) {
+            console.log(result);
+            $scope.users = [];
+            //prepareAssignments(result);
+          },
+          function (error) {
+            $log.error('singleSectionCtrl:getSection', error);
+          }
+        )
+      };
+
+      $scope.search = {
+        where: 'all',
+        what: null
+      };
+
+      $scope.activeSection = null;
+
+
+      $scope.setSearchRange = function (value) {
+        $scope.search.where = value;
+
+      };
+
+
+
+      getCourses();
+
     }
   ]
 );
@@ -1017,11 +1074,16 @@ angular.module('gradeBookApp.services')
   ]
 );
 
-angular.module('gradeBookApp.templates', ['courses/courses.html', 'singleSection/_addNewAssignment.html', 'singleSection/_adjustGradeSettings.html', 'singleSection/singleSection.html']);
+angular.module('gradeBookApp.templates', ['courses/courses.html', 'gradebook/gradebook.html', 'singleSection/_addNewAssignment.html', 'singleSection/_adjustGradeSettings.html', 'singleSection/singleSection.html']);
 
 angular.module("courses/courses.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("courses/courses.html",
     "<div class=\"row\"><h2>Student grades</h2></div><div class=\"row\"><h3>Please select teacher and year</h3></div><div class=\"row field\"><label class=\"inline one column year-teacher\">Year</label><div class=\"picker two columns\"><select ng-model=\"select.year\" ng-options=\"year as year for year in years\"><option value=\"\">Select year</option></select></div></div><div class=\"row field\"><label class=\"inline one column year-teacher\">Teacher</label><div class=\"picker two columns\"><select ng-model=\"select.teacher\" ng-options=\"teacher for teacher in teachers\"><option value=\"\">Select teacher</option></select></div></div><div class=\"row\" ng-if=\"select.teacher && select.year\"><h3>select a class section to edit grades</h3><table class=\"rounded\"><thead><tr><th>CLASSES</th><th>SECTIONS</th></tr></thead><tbody ng-repeat=\"course in courses\"><tr ng-repeat=\"section in course.sections\"><td rowspan=\"{{course.sections.length}}\" ng-if=\"$index == 0\">{{course.fullname}}</td><td><a ng-href=\"/gradebook/sections/{{section.id}}\">{{section.name}}</a></td></tr></tbody></table></div>");
+}]);
+
+angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("gradebook/gradebook.html",
+    "<div class=\"col-xs-3 left-filter\"><h2>Gradebook</h2><div class=\"form-group\"><ul class=\"nav nav-pills\"><li data-ng-class=\"{'active': search.where === 'all'}\"><a data-ng-click=\"setSearchRange('all')\">All</a></li><li data-ng-class=\"{'active': search.where === 'teacher'}\"><a data-ng-click=\"setSearchRange('teacher')\">Teacher</a></li><li data-ng-class=\"{'active': search.where === 'year'}\"><a data-ng-click=\"setSearchRange('year')\">Year</a></li><li data-ng-class=\"{'active': search.where === 'student'}\"><a data-ng-click=\"setSearchRange('student')\">Student</a></li></ul><input type=\"text\" class=\"form-control\" placeholder=\"Type to filter\"></div><ul class=\"nav\"><li data-ng-repeat=\"course in courses\">{{course.fullname}}<ul class=\"nav\"><li data-ng-repeat=\"section in course.sections\" data-ng-class=\"{'active': section.id === activeSection}\"><a data-ng-click=\"getSection(section.id)\">{{section.name}}</a></li></ul></li><li>Math 101<ul class=\"nav\"><li><a href=\"\">Group A</a></li><li><a href=\"\">Group B</a></li><li><a href=\"\">Gruop C</a></li></ul></li><li>Math 102<ul class=\"nav\"><li><a href=\"\">Group A</a></li><li><a href=\"\">Group B</a></li></ul></li></ul></div><div class=\"col-xs-8\"><h2>Math 101: Group A</h2><button class=\"btn btn-primary\" data-ng-click=\"addAssignment()\">Add Assignment</button> <button class=\"btn btn-primary\" data-ng-click=\"showFiltersAndSettings()\">Filters & Settings</button> <span>Click on an assignment to view and edit details</span><hot-table afterchange=\"afterChange\" aftergetcolheader=\"afterGetColHeader\" rowheaders=\"true\" colheaders=\"true\" datarows=\"users\" columns=\"columns\" fixedcolumnsleft=\"2\" minsparerows=\"1\" minsparecols=\"1\"></hot-table></div>");
 }]);
 
 angular.module("singleSection/_addNewAssignment.html", []).run(["$templateCache", function($templateCache) {

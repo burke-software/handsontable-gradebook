@@ -1,3 +1,5 @@
+@import "dark";
+
 .handsontableInput{
   box-sizing: content-box;
 }
@@ -60,8 +62,8 @@ a{
 
 table tbody tr td,table tbody tr th ,
 table tbody tr td:first-child, table tbody tr th:first-child{
-  border-bottom: 1px solid #e0e0e0;
-  border-left: 1px solid #e4e4e4 !important;
+//  border-bottom: 1px solid #e0e0e0;
+//  border-left: 1px solid #e4e4e4 !important;
   vertical-align: top
 }
 

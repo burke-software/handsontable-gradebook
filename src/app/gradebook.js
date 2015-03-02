@@ -22,7 +22,11 @@ angular.module('gradeBookApp', [
       });
 
       $routeProvider.
-        when('/gradebook/',{
+        when('/test',{
+          controller: 'gradeBookCtrl',
+          templateUrl: 'gradebook/gradebook.html'
+        })
+        .when('/gradebook/',{
           controller: 'coursesCtrl',
           templateUrl: 'courses/courses.html'
         })

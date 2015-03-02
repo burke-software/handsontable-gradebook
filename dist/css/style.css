@@ -1,4 +1,30 @@
 @charset "UTF-8";
+#gradebook a {
+  cursor: pointer; }
+#gradebook .left-filter {
+  border-right: 2px solid #9d9d9d; }
+#gradebook .btn {
+  border-radius: 0; }
+#gradebook .nav-pills > li > a {
+  border-radius: 0; }
+#gradebook .form-control {
+  border-radius: 0; }
+#gradebook .handsontable th {
+  background: #fff; }
+#gradebook .handsontable .handsontable table {
+  box-shadow: none;
+  -webkit-box-shadow: none; }
+#gradebook .ht_clone_corner tr th:first-child {
+  background: red; }
+#gradebook table thead tr th {
+  border-left: 0;
+  border-bottom: 1px solid #ccc; }
+#gradebook .ht_clone_corner tr th:first-child,
+#gradebook table tbody tr th:first-child {
+  background: #fff;
+  border-bottom-color: #fff;
+  border-left-color: #fff; }
+
 .handsontableInput {
   box-sizing: content-box; }
 
@@ -53,8 +79,6 @@ a {
 
 table tbody tr td, table tbody tr th,
 table tbody tr td:first-child, table tbody tr th:first-child {
-  border-bottom: 1px solid #e0e0e0;
-  border-left: 1px solid #e4e4e4 !important;
   vertical-align: top; }
 
 .modal {

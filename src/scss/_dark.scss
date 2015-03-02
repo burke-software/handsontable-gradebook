@@ -1,0 +1,52 @@
+#gradebook{
+  a{
+    cursor:pointer;
+  }
+
+  .left-filter{
+    border-right: 2px solid #9d9d9d;
+  }
+
+  .btn{
+    border-radius: 0;
+  }
+
+  .nav-pills > li > a {
+    border-radius : 0;
+  }
+
+  .form-control{
+    border-radius: 0;
+  }
+
+  .handsontable th{
+    background: #fff;
+  }
+
+  .handsontable .handsontable table{
+    box-shadow: none;
+    -webkit-box-shadow: none;
+  }
+
+  .ht_clone_corner{
+    tr{
+      th:first-child{
+        background: red;
+      }
+    }
+  }
+
+  table thead tr th{
+    border-left: 0;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .ht_clone_corner tr th:first-child,
+  table tbody tr th:first-child{
+    background: #fff;
+    border-bottom-color: #fff;
+    border-left-color: #fff;
+
+  }
+}
+
