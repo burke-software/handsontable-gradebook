@@ -22,14 +22,14 @@ angular.module('gradeBookApp', [
       });
 
       $routeProvider.
-        when('/test',{
+        when('/gradebook/',{
           controller: 'gradeBookCtrl',
           templateUrl: 'gradebook/gradebook.html'
         })
-        .when('/gradebook/',{
-          controller: 'coursesCtrl',
-          templateUrl: 'courses/courses.html'
-        })
+        //.when('/gradebook/',{
+        //  controller: 'coursesCtrl',
+        //  templateUrl: 'courses/courses.html'
+        //})
         .when('/gradebook/sections/:sectionId',{
           controller: 'singleSectionCtrl',
           templateUrl: 'singleSection/singleSection.html'
