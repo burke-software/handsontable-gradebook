@@ -130,6 +130,9 @@ angular.module('gradeBookApp.controllers')
         )
       };
 
+      $scope.filtersAndSettingsVisible = false;
+      $scope.assignmentVisible = false;
+
       $scope.search = {
         where: 'all',
         what: null
@@ -137,13 +140,30 @@ angular.module('gradeBookApp.controllers')
 
       $scope.activeSection = null;
 
-
       $scope.setSearchRange = function (value) {
         $scope.search.where = value;
-
       };
 
+      $scope.toggleFilterAndSettings = function () {
+        $scope.assignmentVisible = false;
+        $scope.filtersAndSettingsVisible = !$scope.filtersAndSettingsVisible;
+      };
 
+      $scope.toggleAssignments = function (readOnly) {
+        $scope.readOnly = readOnly;
+        $scope.filtersAndSettingsVisible = false;
+        $scope.assignmentVisible = !$scope.assignmentVisible;
+      };
+
+      $scope.editAssignment = function () {
+        $scope.readOnly = false;
+        $scope.filtersAndSettingsVisible = false;
+        $scope.assignmentVisible = true;
+      };
+
+      $scope.saveAssignment = function () {
+        $scope.assignmentVisible = false;
+      };
 
       getCourses();
 
@@ -1078,25 +1098,418 @@ angular.module('gradeBookApp.templates', ['courses/courses.html', 'gradebook/gra
 
 angular.module("courses/courses.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("courses/courses.html",
-    "<div class=\"row\"><h2>Student grades</h2></div><div class=\"row\"><h3>Please select teacher and year</h3></div><div class=\"row field\"><label class=\"inline one column year-teacher\">Year</label><div class=\"picker two columns\"><select ng-model=\"select.year\" ng-options=\"year as year for year in years\"><option value=\"\">Select year</option></select></div></div><div class=\"row field\"><label class=\"inline one column year-teacher\">Teacher</label><div class=\"picker two columns\"><select ng-model=\"select.teacher\" ng-options=\"teacher for teacher in teachers\"><option value=\"\">Select teacher</option></select></div></div><div class=\"row\" ng-if=\"select.teacher && select.year\"><h3>select a class section to edit grades</h3><table class=\"rounded\"><thead><tr><th>CLASSES</th><th>SECTIONS</th></tr></thead><tbody ng-repeat=\"course in courses\"><tr ng-repeat=\"section in course.sections\"><td rowspan=\"{{course.sections.length}}\" ng-if=\"$index == 0\">{{course.fullname}}</td><td><a ng-href=\"/gradebook/sections/{{section.id}}\">{{section.name}}</a></td></tr></tbody></table></div>");
+    "<div class=\"row\">\n" +
+    "  <h2>Student grades</h2>\n" +
+    "</div>\n" +
+    "\n" +
+    "<div class=\"row\">\n" +
+    "  <h3>Please select teacher and year</h3>\n" +
+    "</div>\n" +
+    "\n" +
+    "<div class=\"row field\">\n" +
+    "  <label class=\"inline one column year-teacher\">Year</label>\n" +
+    "  <div class=\"picker two columns\">\n" +
+    "    <select ng-model=\"select.year\" ng-options=\"year as year for year in years\">\n" +
+    "      <option value=\"\">Select year</option>\n" +
+    "    </select>\n" +
+    "  </div>\n" +
+    "</div>\n" +
+    "<div class=\"row field\">\n" +
+    "  <label class=\"inline one column year-teacher\">Teacher</label>\n" +
+    "\n" +
+    "  <div class=\"picker two columns\">\n" +
+    "    <select ng-model=\"select.teacher\" ng-options=\"teacher for teacher in teachers\">\n" +
+    "      <option value=\"\">Select teacher</option>\n" +
+    "    </select>\n" +
+    "  </div>\n" +
+    "\n" +
+    "</div>\n" +
+    "\n" +
+    "<div class=\"row\" ng-if=\"select.teacher && select.year\">\n" +
+    "  <h3>select a class section to edit grades</h3>\n" +
+    "  <table class=\"rounded\">\n" +
+    "    <thead>\n" +
+    "    <tr>\n" +
+    "      <th>\n" +
+    "        CLASSES\n" +
+    "      </th>\n" +
+    "      <th>\n" +
+    "        SECTIONS\n" +
+    "      </th>\n" +
+    "    </tr>\n" +
+    "    </thead>\n" +
+    "    <tbody ng-repeat=\"course in courses\">\n" +
+    "    <tr ng-repeat=\"section in course.sections\">\n" +
+    "      <td rowspan=\"{{course.sections.length}}\" ng-if=\"$index == 0\">{{course.fullname}}</td>\n" +
+    "      <td>\n" +
+    "        <a ng-href=\"/gradebook/sections/{{section.id}}\">{{section.name}}</a>\n" +
+    "      </td>\n" +
+    "    </tr>\n" +
+    "    </tbody>\n" +
+    "  </table>\n" +
+    "</div>\n" +
+    "\n" +
+    "");
 }]);
 
 angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("gradebook/gradebook.html",
-    "<div id=\"gradebook\"><div class=\"col-xs-3 left-filter\"><h2>Gradebook</h2><div class=\"form-group\"><ul class=\"nav nav-pills\"><li data-ng-class=\"{'active': search.where === 'all'}\"><a data-ng-click=\"setSearchRange('all')\">All</a></li><li data-ng-class=\"{'active': search.where === 'teacher'}\"><a data-ng-click=\"setSearchRange('teacher')\">Teacher</a></li><li data-ng-class=\"{'active': search.where === 'year'}\"><a data-ng-click=\"setSearchRange('year')\">Year</a></li><li data-ng-class=\"{'active': search.where === 'student'}\"><a data-ng-click=\"setSearchRange('student')\">Student</a></li></ul><input type=\"text\" class=\"form-control\" placeholder=\"Type to filter\"></div><ul class=\"nav\"><li data-ng-repeat=\"course in courses\">{{course.fullname}}<ul class=\"nav\"><li data-ng-repeat=\"section in course.sections\" data-ng-class=\"{'active': section.id === activeSection}\"><a data-ng-click=\"getSection(section.id)\">{{section.name}}</a></li></ul></li><li>Math 101<ul class=\"nav\"><li><a href=\"\">Group A</a></li><li><a href=\"\">Group B</a></li><li><a href=\"\">Gruop C</a></li></ul></li><li>Math 102<ul class=\"nav\"><li><a href=\"\">Group A</a></li><li><a href=\"\">Group B</a></li></ul></li></ul></div><div class=\"col-xs-8\"><h2>Math 101: Group A</h2><button class=\"btn btn-primary\" data-ng-click=\"addAssignment()\">Add Assignment</button> <button class=\"btn btn-primary\" data-ng-click=\"showFiltersAndSettings()\">Filters & Settings</button> <span>Click on an assignment to view and edit details</span><hot-table afterchange=\"afterChange\" aftergetcolheader=\"afterGetColHeader\" rowheaders=\"true\" colheaders=\"true\" datarows=\"users\" columns=\"columns\" fixedcolumnsleft=\"2\" minsparerows=\"1\" minsparecols=\"1\"></hot-table></div></div>");
+    "<div id=\"gradebook\">\n" +
+    "  <div class=\"col-xs-3 left-filter\">\n" +
+    "\n" +
+    "    <h2>Gradebook</h2>\n" +
+    "\n" +
+    "    <div class=\"form-group\">\n" +
+    "      <ul class=\"nav nav-pills\">\n" +
+    "        <li data-ng-class=\"{'active': search.where === 'all'}\">\n" +
+    "          <a data-ng-click=\"setSearchRange('all')\">All</a>\n" +
+    "        </li>\n" +
+    "        <li data-ng-class=\"{'active': search.where === 'teacher'}\">\n" +
+    "          <a data-ng-click=\"setSearchRange('teacher')\">Teacher</a>\n" +
+    "        </li>\n" +
+    "        <li data-ng-class=\"{'active': search.where === 'year'}\">\n" +
+    "          <a data-ng-click=\"setSearchRange('year')\">Year</a>\n" +
+    "        </li>\n" +
+    "        <li data-ng-class=\"{'active': search.where === 'student'}\">\n" +
+    "          <a data-ng-click=\"setSearchRange('student')\">Student</a>\n" +
+    "        </li>\n" +
+    "      </ul>\n" +
+    "      <input type=\"text\" class=\"form-control\" placeholder=\"Type to filter\">\n" +
+    "    </div>\n" +
+    "\n" +
+    "\n" +
+    "    <ul class=\"nav\">\n" +
+    "\n" +
+    "      <li data-ng-repeat=\"course in courses\">\n" +
+    "        {{course.fullname}}\n" +
+    "        <ul class=\"nav\">\n" +
+    "          <li data-ng-repeat=\"section in course.sections\" data-ng-class=\"{'active': section.id === activeSection}\">\n" +
+    "            <a data-ng-click=\"getSection(section.id)\">{{section.name}}</a>\n" +
+    "          </li>\n" +
+    "        </ul>\n" +
+    "      </li>\n" +
+    "\n" +
+    "      <li>Math 101\n" +
+    "        <ul class=\"nav\">\n" +
+    "          <li>\n" +
+    "            <a href=\"\">Group A</a>\n" +
+    "          </li>\n" +
+    "          <li>\n" +
+    "            <a href=\"\">Group B</a>\n" +
+    "          </li>\n" +
+    "          <li>\n" +
+    "            <a href=\"\">Gruop C</a>\n" +
+    "          </li>\n" +
+    "        </ul>\n" +
+    "      </li>\n" +
+    "      <li>Math 102\n" +
+    "        <ul class=\"nav\">\n" +
+    "          <li>\n" +
+    "            <a href=\"\">Group A</a>\n" +
+    "          </li>\n" +
+    "          <li>\n" +
+    "            <a href=\"\">Group B</a>\n" +
+    "          </li>\n" +
+    "        </ul>\n" +
+    "      </li>\n" +
+    "    </ul>\n" +
+    "  </div>\n" +
+    "  <div class=\"col-xs-6\">\n" +
+    "    <h2>Math 101: Group A</h2>\n" +
+    "\n" +
+    "    <button class=\"btn btn-primary\" data-ng-click=\"toggleAssignments(false)\">Add Assignment</button>\n" +
+    "    <button class=\"btn btn-primary\" data-ng-click=\"toggleFilterAndSettings()\">Filters & Settings</button>\n" +
+    "    <button class=\"btn btn-primary\" data-ng-click=\"toggleAssignments(true)\">ReadOnly test</button>\n" +
+    "    <span>Click on an assignment to view and edit details</span>\n" +
+    "\n" +
+    "    <div style=\"overflow: auto; padding-bottom: 20px;\">\n" +
+    "\n" +
+    "      <hot-table\n" +
+    "        afterChange=\"afterChange\" ,\n" +
+    "        afterGetColHeader=\"afterGetColHeader\" ,\n" +
+    "        rowHeaders=\"true\"\n" +
+    "        colHeaders=\"true\"\n" +
+    "        datarows=\"users\"\n" +
+    "        columns=\"columns\"\n" +
+    "        fixedColumnsLeft=\"2\"\n" +
+    "        minSpareRows=\"1\"\n" +
+    "        minSpareCols=\"1\"\n" +
+    "        >\n" +
+    "      </hot-table>\n" +
+    "\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "\n" +
+    "\n" +
+    "  <div class=\"col-xs-3 right-settings\"  data-ng-class=\"{'hidden':!assignmentVisible}\">\n" +
+    "    <h2 data-ng-if=\"!readOnly\">Add Assignment</h2>\n" +
+    "    <h2 data-ng-if=\"readOnly\">View Assignment</h2>\n" +
+    "    <form>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"name\">Name</label>\n" +
+    "        <input id=\"name\" class=\"form-control\" type=\"text\" data-ng-if=\"!readOnly\">\n" +
+    "        <p data-ng-if=\"readOnly\">Super long assignment</p>\n" +
+    "      </div>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"date\">Date</label>\n" +
+    "        <input id=\"date\" class=\"form-control\" type=\"text\"  data-ng-if=\"!readOnly\">\n" +
+    "        <p data-ng-if=\"readOnly\">1/1/15</p>\n" +
+    "      </div>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"maxPoints\">Max Points</label>\n" +
+    "        <input id=\"maxPoints\" class=\"form-control\" type=\"text\" data-ng-if=\"!readOnly\">\n" +
+    "        <p data-ng-if=\"readOnly\">75</p>\n" +
+    "      </div>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"assignmentCategory\">Category</label>\n" +
+    "        <select id=\"assignmentCategory\" class=\"form-control\" data-ng-if=\"!readOnly\"></select>\n" +
+    "        <p data-ng-if=\"readOnly\">Category 1</p>\n" +
+    "      </div>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"assignmentType\">Assignment Type</label>\n" +
+    "        <select id=\"assignmentType\" class=\"form-control\" data-ng-if=\"!readOnly\"></select>\n" +
+    "        <p data-ng-if=\"readOnly\">Homework</p>\n" +
+    "      </div>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"markingPeriod\">Marking Period</label>\n" +
+    "        <select id=\"markingPeriod\" class=\"form-control\" data-ng-if=\"!readOnly\"></select>\n" +
+    "        <p data-ng-if=\"readOnly\">MAth101: Group A</p>\n" +
+    "      </div>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"standard\">Standard</label>\n" +
+    "        <select id=\"standard\" class=\"form-control\" data-ng-if=\"!readOnly\"></select>\n" +
+    "        <p data-ng-if=\"readOnly\">Normal</p>\n" +
+    "      </div>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"description\">Description</label>\n" +
+    "        <textarea id=\"description\" class=\"form-control\" data-ng-if=\"!readOnly\"></textarea>\n" +
+    "        <p data-ng-if=\"readOnly\">Lorem ipsum dolor sitmet, conceptuir elit ascit.</p>\n" +
+    "      </div>\n" +
+    "      <button type=\"button\" class=\"btn btn-primary\" data-ng-if=\"!readOnly\" data-ng-click=\"saveAssignment()\">Add to Gradebook</button>\n" +
+    "      <button type=\"button\" class=\"btn btn-primary\" data-ng-if=\"readOnly\" data-ng-click=\"editAssignment()\">Edit Assignment</button>\n" +
+    "    </form>\n" +
+    "  </div>\n" +
+    "  <div class=\"col-xs-3 right-settings\" data-ng-class=\"{'hidden':!filtersAndSettingsVisible}\">\n" +
+    "    <h2>Filters</h2>\n" +
+    "\n" +
+    "    <form>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"currentMarkingPeriod\">Current Marking Period</label>\n" +
+    "        <select class=\"form-control\" id=\"currentMarkingPeriod\">\n" +
+    "        </select>\n" +
+    "      </div>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"category\">Categoru</label>\n" +
+    "        <select class=\"form-control\" id=\"category\"></select>\n" +
+    "      </div>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"currentAssignmentType\">Current Assignment Type</label>\n" +
+    "        <select class=\"form-control\" id=\"currentAssignmentType\"></select>\n" +
+    "      </div>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"assignmentName\">Filter by Assignment Name:</label>\n" +
+    "        <input type=\"text\" id=\"assignmentName\" class=\"form-control\">\n" +
+    "      </div>\n" +
+    "      <button type=\"submit\" class=\"btn btn-primary\">Filter by Selected Options</button>\n" +
+    "    </form>\n" +
+    "\n" +
+    "\n" +
+    "    <h2>Settings</h2>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label>Final Grades Position</label>\n" +
+    "        <div class=\"col-xs-12\">\n" +
+    "          <div class=\"radio-inline\">\n" +
+    "            <input type=\"radio\" id=\"leftPosition\">\n" +
+    "            <label for=\"leftPosition\">Left</label>\n" +
+    "          </div>\n" +
+    "          <div class=\"radio-inline\">\n" +
+    "            <input type=\"radio\" id=\"rightPosition\">\n" +
+    "            <label for=\"rightPosition\">Right</label>\n" +
+    "          </div>\n" +
+    "        </div>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label>Assignment Listed</label>\n" +
+    "        <div class=\"col-xs-12\">\n" +
+    "          <div class=\"radio-inline\">\n" +
+    "            <input type=\"radio\" id=\"oldestFirst\">\n" +
+    "            <label for=\"oldestFirst\">Oldest First</label>\n" +
+    "          </div>\n" +
+    "          <div class=\"radio-inline\">\n" +
+    "            <input type=\"radio\" id=\"newestFirst\">\n" +
+    "            <label for=\"newestFirst\">Newest First</label>\n" +
+    "          </div>\n" +
+    "        </div>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label>Always Show Right Sidebar on Large Screens</label>\n" +
+    "        <div class=\"col-xs-12\">\n" +
+    "          <div class=\"radio-inline\">\n" +
+    "            <input type=\"radio\" id=\"rightSidebarNo\">\n" +
+    "            <label for=\"rightSidebarNo\">No</label>\n" +
+    "          </div>\n" +
+    "          <div class=\"radio-inline\">\n" +
+    "            <input type=\"radio\" id=\"rightSidebarYes\">\n" +
+    "            <label for=\"rightSidebarYes\">Yes</label>\n" +
+    "          </div>\n" +
+    "        </div>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label>Grade input method</label>\n" +
+    "        <p>Schooldriver Gradebook <a data-ng-click=\"\">(change)</a></p>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label>Display names</label>\n" +
+    "        <p>First Last <a data-ng-click=\"\">(change)</a></p>\n" +
+    "      </div>\n" +
+    "\n" +
+    "  </div>\n" +
+    "</div>\n" +
+    "");
 }]);
 
 angular.module("singleSection/_addNewAssignment.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("singleSection/_addNewAssignment.html",
-    "<div class=\"modal active\"><div class=\"content\"><div class=\"modal-header\"><h2 class=\"modal-title text-center\">Add new assignment</h2></div><div class=\"modal-body\"><form class=\"form-horizontal\"><div class=\"row field\"><label class=\"inline two columns year-teacher\">Name</label><div class=\"seven columns\"><input type=\"text\" style=\"width: 100%\" class=\"input\" ng-model=\"assignment.name\" placeholder=\"enter assignment title name\"></div></div><div class=\"row field\"><label class=\"two columns inline year-teacher\">Weight</label><div class=\"seven columns\"><input type=\"text\" style=\"width: 100%\" class=\"input\" ng-model=\"assignment.weight\" placeholder=\"enter assignment weight as a percentage\"></div></div><div class=\"row\"><label class=\"two columns inline year-teacher\">Category</label><div class=\"seven columns picker\"><select class=\"form-control\" ng-model=\"assignment.category\" ng-options=\"category.id as category.name for category in categories\"><option value=\"\">Select category</option></select></div></div></form></div><div class=\"row\"><div class=\"ten columns centered text-center\"><div class=\"btn primary medium\"><a ng-click=\"ok()\">OK</a></div><div class=\"btn warning medium\"><a ng-click=\"cancel()\">Cancel</a></div></div></div></div></div>");
+    "<div class=\"modal active\">\n" +
+    "  <div class=\"content\">\n" +
+    "    <div class=\"modal-header\">\n" +
+    "      <h2 class=\"modal-title text-center\">Add new assignment</h2>\n" +
+    "    </div>\n" +
+    "    <div class=\"modal-body\">\n" +
+    "      <form class=\"form-horizontal\">\n" +
+    "        <div class=\"row field\">\n" +
+    "          <label class=\"inline two columns year-teacher\">Name</label>\n" +
+    "\n" +
+    "          <div class=\"seven columns\">\n" +
+    "            <input type=\"text\" style=\"width: 100%\" class=\"input\" ng-model=\"assignment.name\"\n" +
+    "                   placeholder=\"enter assignment title name\">\n" +
+    "          </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"row field\">\n" +
+    "          <label class=\"two columns inline year-teacher\">Weight</label>\n" +
+    "\n" +
+    "          <div class=\"seven columns\">\n" +
+    "            <input type=\"text\"  style=\"width: 100%\" class=\"input\" ng-model=\"assignment.weight\"\n" +
+    "                   placeholder=\"enter assignment weight as a percentage\">\n" +
+    "          </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"row\">\n" +
+    "          <label class=\"two columns  inline year-teacher\">Category</label>\n" +
+    "\n" +
+    "          <div class=\"seven columns picker\">\n" +
+    "            <select class=\"form-control\" ng-model=\"assignment.category\"\n" +
+    "                    ng-options=\"category.id as category.name for category in categories\">\n" +
+    "              <option value=\"\">Select category</option>\n" +
+    "            </select>\n" +
+    "          </div>\n" +
+    "        </div>\n" +
+    "      </form>\n" +
+    "    </div>\n" +
+    "    <div class=\"row\">\n" +
+    "      <div class=\"ten columns centered text-center\">\n" +
+    "        <div class=\"btn primary medium\">\n" +
+    "          <a ng-click=\"ok()\">OK</a>\n" +
+    "        </div>\n" +
+    "        <div class=\"btn warning medium\">\n" +
+    "          <a ng-click=\"cancel()\">Cancel</a>\n" +
+    "        </div>\n" +
+    "      </div>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "</div>\n" +
+    "\n" +
+    "<!--<div class=\"modal-header\">-->\n" +
+    "  <!--<h3 class=\"modal-title text-center\">Add new assignment</h3>-->\n" +
+    "<!--</div>-->\n" +
+    "<!--<div class=\"modal-body\">-->\n" +
+    "  <!--<form class=\"form-horizontal\">-->\n" +
+    "    <!--<div class=\"form-group\">-->\n" +
+    "      <!--<label class=\"col-sm-3 control-label\">Name</label>-->\n" +
+    "      <!--<div class=\"col-sm-8\">-->\n" +
+    "        <!--<input type=\"text\" class=\"form-control\" ng-model=\"assignment.name\" placeholder=\"enter assignment title name\">-->\n" +
+    "      <!--</div>-->\n" +
+    "    <!--</div>-->\n" +
+    "    <!--<div class=\"form-group\">-->\n" +
+    "      <!--<label class=\"col-sm-3 control-label\">Weight</label>-->\n" +
+    "      <!--<div class=\"col-sm-8\">-->\n" +
+    "        <!--<input type=\"text\" class=\"form-control\" ng-model=\"assignment.weight\" placeholder=\"enter assignment weight as a percentage\">-->\n" +
+    "      <!--</div>-->\n" +
+    "    <!--</div>-->\n" +
+    "    <!--<div class=\"form-group\">-->\n" +
+    "      <!--<label class=\"col-sm-3 control-label\">Category</label>-->\n" +
+    "      <!--<div class=\"col-sm-8\">-->\n" +
+    "        <!--<select class=\"form-control\" ng-model=\"assignment.category\" ng-options=\"category.id as category.name for category in categories\">-->\n" +
+    "          <!--<option value=\"\">Select category</option>-->\n" +
+    "        <!--</select>-->\n" +
+    "      <!--</div>-->\n" +
+    "    <!--</div>-->\n" +
+    "  <!--</form>-->\n" +
+    "<!--</div>-->\n" +
+    "<!--<div class=\"modal-footer\">-->\n" +
+    "  <!--<button class=\"btn btn-primary\" ng-click=\"ok()\">OK</button>-->\n" +
+    "  <!--<button class=\"btn btn-warning\" ng-click=\"cancel()\">Cancel</button>-->\n" +
+    "<!--</div>-->\n" +
+    "");
 }]);
 
 angular.module("singleSection/_adjustGradeSettings.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("singleSection/_adjustGradeSettings.html",
-    "<div class=\"modal active\"><div class=\"content\"><div class=\"modal-header\"><h2 class=\"modal-title text-center\">Adjust grade settings</h2></div><div class=\"modal-body\"><form class=\"form-horizontal\"><div class=\"row field\" ng-repeat=\"assignment in assignments\"><label class=\"inline three columns year-teacher\">{{assignment.name}}</label><div class=\"three columns append\"><input type=\"text\" class=\"input text-right\" style=\"margin-top: -2px\" ng-model=\"assignment.weight\" placeholder=\"enter weight\"> <span class=\"adjoined\" id=\"basic-addon2\">%</span></div></div></form></div><div class=\"row\"><div class=\"ten columns centered text-center\"><div class=\"btn primary medium\"><a ng-click=\"ok()\">Save</a></div><div class=\"btn warning medium\"><a ng-click=\"cancel()\">Cancel</a></div></div></div></div></div>");
+    "<div class=\"modal active\">\n" +
+    "  <div class=\"content\">\n" +
+    "    <div class=\"modal-header\">\n" +
+    "      <h2 class=\"modal-title text-center\">Adjust grade settings</h2>\n" +
+    "    </div>\n" +
+    "    <div class=\"modal-body\">\n" +
+    "      <form class=\"form-horizontal\">\n" +
+    "        <div class=\"row field\" ng-repeat=\"assignment in assignments\">\n" +
+    "          <label class=\"inline three columns year-teacher\">{{assignment.name}}</label>\n" +
+    "          <div class=\"three columns append\">\n" +
+    "            <input type=\"text\" class=\"input text-right\" style=\"margin-top: -2px\" ng-model=\"assignment.weight\" placeholder=\"enter weight\">\n" +
+    "            <span class=\"adjoined\" id=\"basic-addon2\">%</span>\n" +
+    "          </div>\n" +
+    "        </div>\n" +
+    "      </form>\n" +
+    "    </div>\n" +
+    "    <div class=\"row\">\n" +
+    "      <div class=\"ten columns centered text-center\">\n" +
+    "        <div class=\"btn primary medium\">\n" +
+    "          <a ng-click=\"ok()\">Save</a>\n" +
+    "        </div>\n" +
+    "        <div class=\"btn warning medium\">\n" +
+    "          <a ng-click=\"cancel()\">Cancel</a>\n" +
+    "        </div>\n" +
+    "      </div>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "</div>\n" +
+    "");
 }]);
 
 angular.module("singleSection/singleSection.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("singleSection/singleSection.html",
-    "<div class=\"\"><hot-table afterchange=\"afterChange\" aftergetcolheader=\"afterGetColHeader\" rowheaders=\"true\" colheaders=\"true\" datarows=\"users\" columns=\"columns\" fixedcolumnsleft=\"3\" minsparerows=\"1\" minsparecols=\"1\"></hot-table></div><div style=\"margin-top: 20px\"><div class=\"btn primary medium\"><a ng-href=\"#/students/classSections\">View courses & sections</a></div></div>");
+    "<div class=\"\">\n" +
+    "  <hot-table\n" +
+    "    afterChange=\"afterChange\",\n" +
+    "    afterGetColHeader=\"afterGetColHeader\",\n" +
+    "    rowHeaders=\"true\"\n" +
+    "    colHeaders=\"true\"\n" +
+    "    datarows=\"users\"\n" +
+    "    columns=\"columns\"\n" +
+    "    fixedColumnsLeft=\"3\"\n" +
+    "    minSpareRows=\"1\"\n" +
+    "    minSpareCols=\"1\"\n" +
+    "    >\n" +
+    "  </hot-table>\n" +
+    "</div>\n" +
+    "\n" +
+    "<div style=\"margin-top: 20px;\">\n" +
+    "  <div class=\"btn primary medium\">\n" +
+    "    <a ng-href=\"#/students/classSections\">View courses & sections</a>\n" +
+    "  </div>\n" +
+    "</div>\n" +
+    "");
 }]);

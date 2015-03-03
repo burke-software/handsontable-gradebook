@@ -22,8 +22,6 @@
     </div>
 
 
-
-
     <ul class="nav">
 
       <li data-ng-repeat="course in courses">
@@ -37,7 +35,7 @@
 
       <li>Math 101
         <ul class="nav">
-          <li >
+          <li>
             <a href="">Group A</a>
           </li>
           <li>
@@ -60,24 +58,158 @@
       </li>
     </ul>
   </div>
-  <div class="col-xs-8">
+  <div class="col-xs-6">
     <h2>Math 101: Group A</h2>
 
-    <button class="btn btn-primary" data-ng-click="addAssignment()">Add Assignment</button>
-    <button class="btn btn-primary" data-ng-click="showFiltersAndSettings()">Filters & Settings</button>
+    <button class="btn btn-primary" data-ng-click="toggleAssignments(false)">Add Assignment</button>
+    <button class="btn btn-primary" data-ng-click="toggleFilterAndSettings()">Filters & Settings</button>
+    <button class="btn btn-primary" data-ng-click="toggleAssignments(true)">ReadOnly test</button>
     <span>Click on an assignment to view and edit details</span>
 
-    <hot-table
-      afterChange="afterChange",
-      afterGetColHeader="afterGetColHeader",
-      rowHeaders="true"
-      colHeaders="true"
-      datarows="users"
-      columns="columns"
-      fixedColumnsLeft="2"
-      minSpareRows="1"
-      minSpareCols="1"
-      >
-    </hot-table>
+    <div style="overflow: auto; padding-bottom: 20px;">
+
+      <hot-table
+        afterChange="afterChange" ,
+        afterGetColHeader="afterGetColHeader" ,
+        rowHeaders="true"
+        colHeaders="true"
+        datarows="users"
+        columns="columns"
+        fixedColumnsLeft="2"
+        minSpareRows="1"
+        minSpareCols="1"
+        >
+      </hot-table>
+
+    </div>
+  </div>
+
+
+  <div class="col-xs-3 right-settings"  data-ng-class="{'hidden':!assignmentVisible}">
+    <h2 data-ng-if="!readOnly">Add Assignment</h2>
+    <h2 data-ng-if="readOnly">View Assignment</h2>
+    <form>
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input id="name" class="form-control" type="text" data-ng-if="!readOnly">
+        <p data-ng-if="readOnly">Super long assignment</p>
+      </div>
+      <div class="form-group">
+        <label for="date">Date</label>
+        <input id="date" class="form-control" type="text"  data-ng-if="!readOnly">
+        <p data-ng-if="readOnly">1/1/15</p>
+      </div>
+      <div class="form-group">
+        <label for="maxPoints">Max Points</label>
+        <input id="maxPoints" class="form-control" type="text" data-ng-if="!readOnly">
+        <p data-ng-if="readOnly">75</p>
+      </div>
+      <div class="form-group">
+        <label for="assignmentCategory">Category</label>
+        <select id="assignmentCategory" class="form-control" data-ng-if="!readOnly"></select>
+        <p data-ng-if="readOnly">Category 1</p>
+      </div>
+      <div class="form-group">
+        <label for="assignmentType">Assignment Type</label>
+        <select id="assignmentType" class="form-control" data-ng-if="!readOnly"></select>
+        <p data-ng-if="readOnly">Homework</p>
+      </div>
+      <div class="form-group">
+        <label for="markingPeriod">Marking Period</label>
+        <select id="markingPeriod" class="form-control" data-ng-if="!readOnly"></select>
+        <p data-ng-if="readOnly">MAth101: Group A</p>
+      </div>
+      <div class="form-group">
+        <label for="standard">Standard</label>
+        <select id="standard" class="form-control" data-ng-if="!readOnly"></select>
+        <p data-ng-if="readOnly">Normal</p>
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" class="form-control" data-ng-if="!readOnly"></textarea>
+        <p data-ng-if="readOnly">Lorem ipsum dolor sitmet, conceptuir elit ascit.</p>
+      </div>
+      <button type="button" class="btn btn-primary" data-ng-if="!readOnly" data-ng-click="saveAssignment()">Add to Gradebook</button>
+      <button type="button" class="btn btn-primary" data-ng-if="readOnly" data-ng-click="editAssignment()">Edit Assignment</button>
+    </form>
+  </div>
+  <div class="col-xs-3 right-settings" data-ng-class="{'hidden':!filtersAndSettingsVisible}">
+    <h2>Filters</h2>
+
+    <form>
+      <div class="form-group">
+        <label for="currentMarkingPeriod">Current Marking Period</label>
+        <select class="form-control" id="currentMarkingPeriod">
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="category">Categoru</label>
+        <select class="form-control" id="category"></select>
+      </div>
+      <div class="form-group">
+        <label for="currentAssignmentType">Current Assignment Type</label>
+        <select class="form-control" id="currentAssignmentType"></select>
+      </div>
+      <div class="form-group">
+        <label for="assignmentName">Filter by Assignment Name:</label>
+        <input type="text" id="assignmentName" class="form-control">
+      </div>
+      <button type="submit" class="btn btn-primary">Filter by Selected Options</button>
+    </form>
+
+
+    <h2>Settings</h2>
+      <div class="form-group">
+        <label>Final Grades Position</label>
+        <div class="col-xs-12">
+          <div class="radio-inline">
+            <input type="radio" id="leftPosition">
+            <label for="leftPosition">Left</label>
+          </div>
+          <div class="radio-inline">
+            <input type="radio" id="rightPosition">
+            <label for="rightPosition">Right</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Assignment Listed</label>
+        <div class="col-xs-12">
+          <div class="radio-inline">
+            <input type="radio" id="oldestFirst">
+            <label for="oldestFirst">Oldest First</label>
+          </div>
+          <div class="radio-inline">
+            <input type="radio" id="newestFirst">
+            <label for="newestFirst">Newest First</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Always Show Right Sidebar on Large Screens</label>
+        <div class="col-xs-12">
+          <div class="radio-inline">
+            <input type="radio" id="rightSidebarNo">
+            <label for="rightSidebarNo">No</label>
+          </div>
+          <div class="radio-inline">
+            <input type="radio" id="rightSidebarYes">
+            <label for="rightSidebarYes">Yes</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Grade input method</label>
+        <p>Schooldriver Gradebook <a data-ng-click="">(change)</a></p>
+      </div>
+
+      <div class="form-group">
+        <label>Display names</label>
+        <p>First Last <a data-ng-click="">(change)</a></p>
+      </div>
+
   </div>
 </div>

@@ -30,6 +30,9 @@ angular.module('gradeBookApp.controllers')
         )
       };
 
+      $scope.filtersAndSettingsVisible = false;
+      $scope.assignmentVisible = false;
+
       $scope.search = {
         where: 'all',
         what: null
@@ -37,13 +40,30 @@ angular.module('gradeBookApp.controllers')
 
       $scope.activeSection = null;
 
-
       $scope.setSearchRange = function (value) {
         $scope.search.where = value;
-
       };
 
+      $scope.toggleFilterAndSettings = function () {
+        $scope.assignmentVisible = false;
+        $scope.filtersAndSettingsVisible = !$scope.filtersAndSettingsVisible;
+      };
 
+      $scope.toggleAssignments = function (readOnly) {
+        $scope.readOnly = readOnly;
+        $scope.filtersAndSettingsVisible = false;
+        $scope.assignmentVisible = !$scope.assignmentVisible;
+      };
+
+      $scope.editAssignment = function () {
+        $scope.readOnly = false;
+        $scope.filtersAndSettingsVisible = false;
+        $scope.assignmentVisible = true;
+      };
+
+      $scope.saveAssignment = function () {
+        $scope.assignmentVisible = false;
+      };
 
       getCourses();
 

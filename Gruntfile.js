@@ -17,19 +17,18 @@ module.exports = function (grunt) {
 
 
       html2js: {
-        commonDirectives: {
+        templates: {
           options: {
             module: 'gradeBookApp.templates',      // ANGULAR MODULE NAME
             base: 'src/app/modules/',          // REMOVE PATH FROM FILE
             htmlmin: {
-              collapseWhitespace: true,
-              removeComments: true
+              //collapseWhitespace: true
+              //removeComments: true
             }
           },
           dest: 'tmp/commonDirectives.js',
           src: [
-            'src/app/modules/**/**/*.html',
-            'src/app/modules/**/**/**/*.html'
+            'src/app/modules/**/*.html'
           ]
         }
       },
