@@ -116,6 +116,12 @@ angular.module('gradeBookApp.controllers')
         )
       };
 
+      var hideRightColumn = function () {
+        $scope.filtersVisible = false;
+        $scope.settingsVisible = false;
+        $scope.assignmentVisible = false;
+      };
+
       $scope.getSection = function (sectionId) {
         $scope.activeSection = sectionId;
         classSectionFactory.getBySection({sectionId: sectionId}).$promise.then(
@@ -130,8 +136,11 @@ angular.module('gradeBookApp.controllers')
         )
       };
 
-      $scope.filtersAndSettingsVisible = false;
+      $scope.filtersVisible = false;
+      $scope.settingsVisible = false;
       $scope.assignmentVisible = false;
+
+
 
       $scope.search = {
         where: 'all',
@@ -144,20 +153,25 @@ angular.module('gradeBookApp.controllers')
         $scope.search.where = value;
       };
 
-      $scope.toggleFilterAndSettings = function () {
-        $scope.assignmentVisible = false;
-        $scope.filtersAndSettingsVisible = !$scope.filtersAndSettingsVisible;
+      $scope.toggleFilter = function () {
+        hideRightColumn();
+        $scope.filtersVisible = true;
+      };
+
+      $scope.toggleSettings = function () {
+        hideRightColumn();
+        $scope.settingsVisible = true;
       };
 
       $scope.toggleAssignments = function (readOnly) {
         $scope.readOnly = readOnly;
-        $scope.filtersAndSettingsVisible = false;
-        $scope.assignmentVisible = !$scope.assignmentVisible;
+        hideRightColumn();
+        $scope.assignmentVisible = true;
       };
 
       $scope.editAssignment = function () {
         $scope.readOnly = false;
-        $scope.filtersAndSettingsVisible = false;
+        hideRightColumn();
         $scope.assignmentVisible = true;
       };
 
@@ -1217,8 +1231,9 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "  <div class=\"col-xs-6\">\n" +
     "    <h2>Math 101: Group A</h2>\n" +
     "\n" +
-    "    <button class=\"btn btn-primary\" data-ng-click=\"toggleAssignments(false)\">Add Assignment</button>\n" +
-    "    <button class=\"btn btn-primary\" data-ng-click=\"toggleFilterAndSettings()\">Filters & Settings</button>\n" +
+    "    <button class=\"btn btn-primary\" data-ng-click=\"toggleAssignments(false)\"><i class=\"fa fa-plus\"></i>&nbsp;Add Assignment</button>\n" +
+    "    <button class=\"btn btn-primary\" data-ng-click=\"toggleFilter()\"><i class=\"fa fa-filter\"></i>&nbsp;Filters</button>\n" +
+    "    <button class=\"btn btn-primary\" data-ng-click=\"toggleSettings()\"><i class=\"fa fa-sliders\"></i>&nbsp;Settings</button>\n" +
     "    <button class=\"btn btn-primary\" data-ng-click=\"toggleAssignments(true)\">ReadOnly test</button>\n" +
     "    <span>Click on an assignment to view and edit details</span>\n" +
     "\n" +
@@ -1289,17 +1304,17 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "      <button type=\"button\" class=\"btn btn-primary\" data-ng-if=\"readOnly\" data-ng-click=\"editAssignment()\">Edit Assignment</button>\n" +
     "    </form>\n" +
     "  </div>\n" +
-    "  <div class=\"col-xs-3 right-settings\" data-ng-class=\"{'hidden':!filtersAndSettingsVisible}\">\n" +
+    "  <div class=\"col-xs-3 right-settings\" data-ng-class=\"{'hidden':!filtersVisible}\">\n" +
     "    <h2>Filters</h2>\n" +
     "\n" +
     "    <form>\n" +
     "      <div class=\"form-group\">\n" +
-    "        <label for=\"currentMarkingPeriod\">Current Marking Period</label>\n" +
+    "        <label for=\"currentMarkingPeriod\">Marking Period</label>\n" +
     "        <select class=\"form-control\" id=\"currentMarkingPeriod\">\n" +
     "        </select>\n" +
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
-    "        <label for=\"category\">Categoru</label>\n" +
+    "        <label for=\"category\">Select Category</label>\n" +
     "        <select class=\"form-control\" id=\"category\"></select>\n" +
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
@@ -1307,66 +1322,89 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "        <select class=\"form-control\" id=\"currentAssignmentType\"></select>\n" +
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
+    "        <label for=\"filterStandard\">Standard(s)</label>\n" +
+    "        <select class=\"form-control\" id=\"filterStandard\"></select>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label for=\"studentCohort\">Student Cohort</label>\n" +
+    "        <select class=\"form-control\" id=\"studentCohort\"></select>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"form-group\">\n" +
     "        <label for=\"assignmentName\">Filter by Assignment Name:</label>\n" +
     "        <input type=\"text\" id=\"assignmentName\" class=\"form-control\">\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <label>Filter by Date Range</label>\n" +
+    "        <div class=\"form-inline\">\n" +
+    "          <input type=\"text\" class=\"form-control\">\n" +
+    "          to\n" +
+    "          <input type=\"text\" class=\"form-control\">\n" +
+    "        </div>\n" +
     "      </div>\n" +
     "      <button type=\"submit\" class=\"btn btn-primary\">Filter by Selected Options</button>\n" +
     "    </form>\n" +
     "\n" +
     "\n" +
+    "\n" +
+    "\n" +
+    "  </div>\n" +
+    "\n" +
+    "  <div class=\"col-xs-3 right-settings\" data-ng-class=\"{'hidden':!settingsVisible}\">\n" +
     "    <h2>Settings</h2>\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label>Final Grades Position</label>\n" +
-    "        <div class=\"col-xs-12\">\n" +
-    "          <div class=\"radio-inline\">\n" +
-    "            <input type=\"radio\" id=\"leftPosition\">\n" +
-    "            <label for=\"leftPosition\">Left</label>\n" +
-    "          </div>\n" +
-    "          <div class=\"radio-inline\">\n" +
-    "            <input type=\"radio\" id=\"rightPosition\">\n" +
-    "            <label for=\"rightPosition\">Right</label>\n" +
-    "          </div>\n" +
+    "    <div class=\"form-group\">\n" +
+    "      <label>Final Grades Position</label>\n" +
+    "      <div class=\"col-xs-12\">\n" +
+    "        <div class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" id=\"leftPosition\">\n" +
+    "          <label for=\"leftPosition\">Left</label>\n" +
+    "        </div>\n" +
+    "        <div class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" id=\"rightPosition\">\n" +
+    "          <label for=\"rightPosition\">Right</label>\n" +
     "        </div>\n" +
     "      </div>\n" +
+    "    </div>\n" +
     "\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label>Assignment Listed</label>\n" +
-    "        <div class=\"col-xs-12\">\n" +
-    "          <div class=\"radio-inline\">\n" +
-    "            <input type=\"radio\" id=\"oldestFirst\">\n" +
-    "            <label for=\"oldestFirst\">Oldest First</label>\n" +
-    "          </div>\n" +
-    "          <div class=\"radio-inline\">\n" +
-    "            <input type=\"radio\" id=\"newestFirst\">\n" +
-    "            <label for=\"newestFirst\">Newest First</label>\n" +
-    "          </div>\n" +
+    "    <div class=\"form-group\">\n" +
+    "      <label>Assignment Listed</label>\n" +
+    "      <div class=\"col-xs-12\">\n" +
+    "        <div class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" id=\"oldestFirst\">\n" +
+    "          <label for=\"oldestFirst\">Oldest First</label>\n" +
+    "        </div>\n" +
+    "        <div class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" id=\"newestFirst\">\n" +
+    "          <label for=\"newestFirst\">Newest First</label>\n" +
     "        </div>\n" +
     "      </div>\n" +
+    "    </div>\n" +
     "\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label>Always Show Right Sidebar on Large Screens</label>\n" +
-    "        <div class=\"col-xs-12\">\n" +
-    "          <div class=\"radio-inline\">\n" +
-    "            <input type=\"radio\" id=\"rightSidebarNo\">\n" +
-    "            <label for=\"rightSidebarNo\">No</label>\n" +
-    "          </div>\n" +
-    "          <div class=\"radio-inline\">\n" +
-    "            <input type=\"radio\" id=\"rightSidebarYes\">\n" +
-    "            <label for=\"rightSidebarYes\">Yes</label>\n" +
-    "          </div>\n" +
+    "    <div class=\"form-group\">\n" +
+    "      <label>Always Show Right Sidebar on Large Screens</label>\n" +
+    "      <div class=\"col-xs-12\">\n" +
+    "        <div class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" id=\"rightSidebarNo\">\n" +
+    "          <label for=\"rightSidebarNo\">No</label>\n" +
+    "        </div>\n" +
+    "        <div class=\"radio-inline\">\n" +
+    "          <input type=\"radio\" id=\"rightSidebarYes\">\n" +
+    "          <label for=\"rightSidebarYes\">Yes</label>\n" +
     "        </div>\n" +
     "      </div>\n" +
+    "    </div>\n" +
     "\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label>Grade input method</label>\n" +
-    "        <p>Schooldriver Gradebook <a data-ng-click=\"\">(change)</a></p>\n" +
-    "      </div>\n" +
+    "    <div class=\"form-group\">\n" +
+    "      <label>Grade input method</label>\n" +
+    "      <p>Schooldriver Gradebook <a data-ng-click=\"\">(change)</a></p>\n" +
+    "    </div>\n" +
     "\n" +
-    "      <div class=\"form-group\">\n" +
-    "        <label>Display names</label>\n" +
-    "        <p>First Last <a data-ng-click=\"\">(change)</a></p>\n" +
-    "      </div>\n" +
-    "\n" +
+    "    <div class=\"form-group\">\n" +
+    "      <label>Display names</label>\n" +
+    "      <p>First Last <a data-ng-click=\"\">(change)</a></p>\n" +
+    "    </div>\n" +
     "  </div>\n" +
     "</div>\n" +
     "");

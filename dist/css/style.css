@@ -1,4 +1,4 @@
-@charset "UTF-8";
+@charset "CP852";
 #gradebook a {
   cursor: pointer; }
 #gradebook .left-filter {
@@ -96,5 +96,3 @@ table tbody tr td:first-child, table tbody tr th:first-child {
 .modal > .content {
   border: 1px solid #e4e4e4;
   border-radius: 4px; }
-
-/*# sourceMappingURL=style.css.map */

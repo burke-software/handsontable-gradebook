@@ -16,6 +16,12 @@ angular.module('gradeBookApp.controllers')
         )
       };
 
+      var hideRightColumn = function () {
+        $scope.filtersVisible = false;
+        $scope.settingsVisible = false;
+        $scope.assignmentVisible = false;
+      };
+
       $scope.getSection = function (sectionId) {
         $scope.activeSection = sectionId;
         classSectionFactory.getBySection({sectionId: sectionId}).$promise.then(
@@ -30,8 +36,11 @@ angular.module('gradeBookApp.controllers')
         )
       };
 
-      $scope.filtersAndSettingsVisible = false;
+      $scope.filtersVisible = false;
+      $scope.settingsVisible = false;
       $scope.assignmentVisible = false;
+
+
 
       $scope.search = {
         where: 'all',
@@ -44,20 +53,25 @@ angular.module('gradeBookApp.controllers')
         $scope.search.where = value;
       };
 
-      $scope.toggleFilterAndSettings = function () {
-        $scope.assignmentVisible = false;
-        $scope.filtersAndSettingsVisible = !$scope.filtersAndSettingsVisible;
+      $scope.toggleFilter = function () {
+        hideRightColumn();
+        $scope.filtersVisible = true;
+      };
+
+      $scope.toggleSettings = function () {
+        hideRightColumn();
+        $scope.settingsVisible = true;
       };
 
       $scope.toggleAssignments = function (readOnly) {
         $scope.readOnly = readOnly;
-        $scope.filtersAndSettingsVisible = false;
-        $scope.assignmentVisible = !$scope.assignmentVisible;
+        hideRightColumn();
+        $scope.assignmentVisible = true;
       };
 
       $scope.editAssignment = function () {
         $scope.readOnly = false;
-        $scope.filtersAndSettingsVisible = false;
+        hideRightColumn();
         $scope.assignmentVisible = true;
       };
 
