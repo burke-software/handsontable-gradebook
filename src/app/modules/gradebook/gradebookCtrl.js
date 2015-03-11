@@ -4,9 +4,11 @@ angular.module('gradeBookApp.controllers')
   [
     '$scope',
     'courseFactory',
+    'assignmentFactory',
+    'schoolYearFactory',
     'classSectionFactory',
     '$log',
-    function ($scope, courseFactory, classSectionFactory, $log) {
+    function ($scope, courseFactory, assignmentFactory, schoolYearFactory, classSectionFactory, $log) {
 
       var getCourses = function () {
         courseFactory.get().$promise.then(
@@ -22,6 +24,19 @@ angular.module('gradeBookApp.controllers')
         $scope.assignmentVisible = false;
       };
 
+      var getActiveMarketingPeriod = function () {
+        schoolYearFactory.get().$promise.then(
+          function (result){
+            for (var i = 0, len = result.length; i < len; i++) {
+              if (result[i].active_year){
+                $scope.marketingPeriodSet = result[i].marketingperiod_set;
+                break;
+              }
+            }
+          }
+        )
+      };
+
       $scope.getSection = function (sectionId) {
         $scope.activeSection = sectionId;
         classSectionFactory.getBySection({sectionId: sectionId}).$promise.then(
@@ -32,6 +47,19 @@ angular.module('gradeBookApp.controllers')
           },
           function (error) {
             $log.error('singleSectionCtrl:getSection', error);
+          }
+        )
+      };
+
+      $scope.newAssignment = {};
+
+      $scope.marketingPeriodSet = [];
+
+      $scope.saveAssignment = function () {
+        assignmentFactory.save($scope.newAssignment).$promise.then(
+          function (result) {
+            console.log(result);
+            hideRightColumn();
           }
         )
       };
@@ -83,11 +111,10 @@ angular.module('gradeBookApp.controllers')
         $scope.assignmentVisible = true;
       };
 
-      $scope.saveAssignment = function () {
-        $scope.assignmentVisible = false;
-      };
+
 
       getCourses();
+      getActiveMarketingPeriod();
 
     }
   ]

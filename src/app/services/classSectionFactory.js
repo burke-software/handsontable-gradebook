@@ -6,7 +6,7 @@ angular.module('gradeBookApp.services')
     '$resource',
     '$log',
     function (appConfig, $resource, $log){
-      return $resource(appConfig.apiUrl + '/classSection/:sectionId/ ',
+      return $resource(appConfig.apiUrl + 'classSection/:sectionId/ ',
         {
           sectionId: '@sectionId'
         },

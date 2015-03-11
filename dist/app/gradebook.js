@@ -104,9 +104,11 @@ angular.module('gradeBookApp.controllers')
   [
     '$scope',
     'courseFactory',
+    'assignmentFactory',
+    'schoolYearFactory',
     'classSectionFactory',
     '$log',
-    function ($scope, courseFactory, classSectionFactory, $log) {
+    function ($scope, courseFactory, assignmentFactory, schoolYearFactory, classSectionFactory, $log) {
 
       var getCourses = function () {
         courseFactory.get().$promise.then(
@@ -122,6 +124,19 @@ angular.module('gradeBookApp.controllers')
         $scope.assignmentVisible = false;
       };
 
+      var getActiveMarketingPeriod = function () {
+        schoolYearFactory.get().$promise.then(
+          function (result){
+            for (var i = 0, len = result.length; i < len; i++) {
+              if (result[i].active_year){
+                $scope.marketingPeriodSet = result[i].marketingperiod_set;
+                break;
+              }
+            }
+          }
+        )
+      };
+
       $scope.getSection = function (sectionId) {
         $scope.activeSection = sectionId;
         classSectionFactory.getBySection({sectionId: sectionId}).$promise.then(
@@ -132,6 +147,19 @@ angular.module('gradeBookApp.controllers')
           },
           function (error) {
             $log.error('singleSectionCtrl:getSection', error);
+          }
+        )
+      };
+
+      $scope.newAssignment = {};
+
+      $scope.marketingPeriodSet = [];
+
+      $scope.saveAssignment = function () {
+        assignmentFactory.save($scope.newAssignment).$promise.then(
+          function (result) {
+            console.log(result);
+            hideRightColumn();
           }
         )
       };
@@ -183,11 +211,10 @@ angular.module('gradeBookApp.controllers')
         $scope.assignmentVisible = true;
       };
 
-      $scope.saveAssignment = function () {
-        $scope.assignmentVisible = false;
-      };
+
 
       getCourses();
+      getActiveMarketingPeriod();
 
     }
   ]
@@ -694,7 +721,7 @@ angular.module('gradeBookApp.services')
     '$resource',
     '$log',
     function (appConfig, $resource, $log){
-      return $resource(appConfig.apiUrl + '/classSection/:sectionId/ ',
+      return $resource(appConfig.apiUrl + 'classSection/:sectionId/ ',
         {
           sectionId: '@sectionId'
         },
@@ -1037,6 +1064,31 @@ angular.module('gradeBookApp.services')
 
 angular.module('gradeBookApp.services')
   .factory(
+  'schoolYearFactory',
+  [
+    'appConfig',
+    '$resource',
+    function (appConfig, $resource) {
+      return $resource(appConfig.apiUrl + 'schoolYear/:schoolYearId/ ',
+        {
+          schoolYearId: '@schoolYearId'
+        },
+        {
+
+          create: {
+            method: 'POST'
+          },
+          update: {
+            method: 'PUT'
+          }
+        }
+      )
+    }
+  ]
+);
+
+angular.module('gradeBookApp.services')
+  .factory(
   'sectionFactory',
   [
     'appConfig',
@@ -1259,7 +1311,6 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "        minSpareRows=\"1\"\n" +
     "        minSpareCols=\"1\">\n" +
     "      </hot-table>\n" +
-    "\n" +
     "    </div>\n" +
     "  </div>\n" +
     "\n" +
@@ -1291,32 +1342,32 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"name\">Name</label>\n" +
-    "        <input id=\"name\" class=\"form-control\" type=\"text\" data-ng-if=\"!readOnly\">\n" +
+    "        <input id=\"name\" class=\"form-control\" type=\"text\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.name\">\n" +
     "        <p data-ng-if=\"readOnly\">Super long assignment</p>\n" +
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"date\">Date</label>\n" +
-    "        <input id=\"date\" class=\"form-control\" type=\"text\"  data-ng-if=\"!readOnly\">\n" +
+    "        <input id=\"date\" class=\"form-control\" type=\"text\"  data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.date\">\n" +
     "        <p data-ng-if=\"readOnly\">1/1/15</p>\n" +
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"maxPoints\">Max Points</label>\n" +
-    "        <input id=\"maxPoints\" class=\"form-control\" type=\"text\" data-ng-if=\"!readOnly\">\n" +
+    "        <input id=\"maxPoints\" class=\"form-control\" type=\"text\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.points_possible\">\n" +
     "        <p data-ng-if=\"readOnly\">75</p>\n" +
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"assignmentCategory\">Category</label>\n" +
-    "        <select id=\"assignmentCategory\" class=\"form-control\" data-ng-if=\"!readOnly\"></select>\n" +
+    "        <select id=\"assignmentCategory\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.category\"></select>\n" +
     "        <p data-ng-if=\"readOnly\">Category 1</p>\n" +
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"assignmentType\">Assignment Type</label>\n" +
-    "        <select id=\"assignmentType\" class=\"form-control\" data-ng-if=\"!readOnly\"></select>\n" +
+    "        <select id=\"assignmentType\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.assignment_type\"></select>\n" +
     "        <p data-ng-if=\"readOnly\">Homework</p>\n" +
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"markingPeriod\">Marking Period</label>\n" +
-    "        <select id=\"markingPeriod\" class=\"form-control\" data-ng-if=\"!readOnly\"></select>\n" +
+    "        <select id=\"markingPeriod\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.marking_period\"></select>\n" +
     "        <p data-ng-if=\"readOnly\">MAth101: Group A</p>\n" +
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
@@ -1326,7 +1377,7 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"description\">Description</label>\n" +
-    "        <textarea id=\"description\" class=\"form-control\" data-ng-if=\"!readOnly\"></textarea>\n" +
+    "        <textarea id=\"description\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.description\"></textarea>\n" +
     "        <p data-ng-if=\"readOnly\">Lorem ipsum dolor sitmet, conceptuir elit ascit.</p>\n" +
     "      </div>\n" +
     "      <button type=\"button\" class=\"btn btn-primary\" data-ng-if=\"!readOnly\" data-ng-click=\"saveAssignment()\">Add to Gradebook</button>\n" +
