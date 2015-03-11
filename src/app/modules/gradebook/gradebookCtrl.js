@@ -39,7 +39,7 @@ angular.module('gradeBookApp.controllers')
       $scope.filtersVisible = false;
       $scope.settingsVisible = false;
       $scope.assignmentVisible = false;
-
+      $scope.multipleAssignments = false;
 
 
       $scope.search = {
@@ -51,6 +51,10 @@ angular.module('gradeBookApp.controllers')
 
       $scope.setSearchRange = function (value) {
         $scope.search.where = value;
+      };
+
+      $scope.cancel = function () {
+        hideRightColumn();
       };
 
       $scope.toggleFilter = function () {
@@ -67,6 +71,10 @@ angular.module('gradeBookApp.controllers')
         $scope.readOnly = readOnly;
         hideRightColumn();
         $scope.assignmentVisible = true;
+      };
+
+      $scope.showMultipleAssignments = function (multiple) {
+        $scope.multipleAssignments = multiple;
       };
 
       $scope.editAssignment = function () {

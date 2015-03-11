@@ -1,5 +1,5 @@
 <div id="gradebook">
-  <div class="col-xs-3 left-filter">
+  <div class="col-sm-3 hidden-xs left-filter">
 
     <h2>Gradebook</h2>
 
@@ -58,10 +58,11 @@
       </li>
     </ul>
   </div>
-  <div class="col-xs-6">
+  <div class="col-xs-9 col-sm-6">
     <h2>Math 101: Group A</h2>
 
-    <button class="btn btn-primary" data-ng-click="toggleAssignments(false)"><i class="fa fa-plus"></i>&nbsp;Add Assignment</button>
+    <button class="btn btn-primary visible-xs" data-ng-click="showSearch()">Show search</button>
+    <button class="btn btn-primary" data-ng-click="toggleAssignments(false)"><i class="fa fa-plus"></i>&nbsp;Add Assignment(s)</button>
     <button class="btn btn-primary" data-ng-click="toggleFilter()"><i class="fa fa-filter"></i>&nbsp;Filters</button>
     <button class="btn btn-primary" data-ng-click="toggleSettings()"><i class="fa fa-sliders"></i>&nbsp;Settings</button>
     <button class="btn btn-primary" data-ng-click="toggleAssignments(true)">ReadOnly test</button>
@@ -87,9 +88,30 @@
 
 
   <div class="col-xs-3 right-settings"  data-ng-class="{'hidden':!assignmentVisible}">
-    <h2 data-ng-if="!readOnly">Add Assignment</h2>
+    <h2 data-ng-if="!readOnly">
+      <span data-ng-if="!multipleAssignments">Add Assignment</span>
+      <span data-ng-if="multipleAssignments">Add Assignments</span>
+    </h2>
     <h2 data-ng-if="readOnly">View Assignment</h2>
     <form>
+      <div class="form-group">
+        <div class="col-xs-12">
+          <div class="radio-inline">
+            <input type="radio" id="singleAssignment" data-ng-model="multipleAssignments" data-ng-value="false">
+            <label for="singleAssignment">Single</label>
+          </div>
+          <div class="radio-inline">
+            <input type="radio" id="multipleAssignments" data-ng-model="multipleAssignments" data-ng-value="true">
+            <label for="multipleAssignments">Multiple</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" data-ng-if="multipleAssignments">
+        <label for="howManyAssignments">How many assignments?</label>
+        <input id="howManyAssignments" class="form-control" type="text">
+      </div>
+
       <div class="form-group">
         <label for="name">Name</label>
         <input id="name" class="form-control" type="text" data-ng-if="!readOnly">
@@ -131,9 +153,13 @@
         <p data-ng-if="readOnly">Lorem ipsum dolor sitmet, conceptuir elit ascit.</p>
       </div>
       <button type="button" class="btn btn-primary" data-ng-if="!readOnly" data-ng-click="saveAssignment()">Add to Gradebook</button>
+      <button type="button" class="btn btn-primary" data-ng-if="!readOnly" data-ng-click="cancel()">Cancel</button>
       <button type="button" class="btn btn-primary" data-ng-if="readOnly" data-ng-click="editAssignment()">Edit Assignment</button>
     </form>
   </div>
+
+
+
   <div class="col-xs-3 right-settings" data-ng-class="{'hidden':!filtersVisible}">
     <h2>Filters</h2>
 

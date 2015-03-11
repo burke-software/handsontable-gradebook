@@ -139,7 +139,7 @@ angular.module('gradeBookApp.controllers')
       $scope.filtersVisible = false;
       $scope.settingsVisible = false;
       $scope.assignmentVisible = false;
-
+      $scope.multipleAssignments = false;
 
 
       $scope.search = {
@@ -151,6 +151,10 @@ angular.module('gradeBookApp.controllers')
 
       $scope.setSearchRange = function (value) {
         $scope.search.where = value;
+      };
+
+      $scope.cancel = function () {
+        hideRightColumn();
       };
 
       $scope.toggleFilter = function () {
@@ -167,6 +171,10 @@ angular.module('gradeBookApp.controllers')
         $scope.readOnly = readOnly;
         hideRightColumn();
         $scope.assignmentVisible = true;
+      };
+
+      $scope.showMultipleAssignments = function (multiple) {
+        $scope.multipleAssignments = multiple;
       };
 
       $scope.editAssignment = function () {
@@ -1169,7 +1177,7 @@ angular.module("courses/courses.html", []).run(["$templateCache", function($temp
 angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("gradebook/gradebook.html",
     "<div id=\"gradebook\">\n" +
-    "  <div class=\"col-xs-3 left-filter\">\n" +
+    "  <div class=\"col-sm-3 hidden-xs left-filter\">\n" +
     "\n" +
     "    <h2>Gradebook</h2>\n" +
     "\n" +
@@ -1228,10 +1236,11 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "      </li>\n" +
     "    </ul>\n" +
     "  </div>\n" +
-    "  <div class=\"col-xs-6\">\n" +
+    "  <div class=\"col-xs-9 col-sm-6\">\n" +
     "    <h2>Math 101: Group A</h2>\n" +
     "\n" +
-    "    <button class=\"btn btn-primary\" data-ng-click=\"toggleAssignments(false)\"><i class=\"fa fa-plus\"></i>&nbsp;Add Assignment</button>\n" +
+    "    <button class=\"btn btn-primary visible-xs\" data-ng-click=\"showSearch()\">Show search</button>\n" +
+    "    <button class=\"btn btn-primary\" data-ng-click=\"toggleAssignments(false)\"><i class=\"fa fa-plus\"></i>&nbsp;Add Assignment(s)</button>\n" +
     "    <button class=\"btn btn-primary\" data-ng-click=\"toggleFilter()\"><i class=\"fa fa-filter\"></i>&nbsp;Filters</button>\n" +
     "    <button class=\"btn btn-primary\" data-ng-click=\"toggleSettings()\"><i class=\"fa fa-sliders\"></i>&nbsp;Settings</button>\n" +
     "    <button class=\"btn btn-primary\" data-ng-click=\"toggleAssignments(true)\">ReadOnly test</button>\n" +
@@ -1257,9 +1266,30 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "\n" +
     "\n" +
     "  <div class=\"col-xs-3 right-settings\"  data-ng-class=\"{'hidden':!assignmentVisible}\">\n" +
-    "    <h2 data-ng-if=\"!readOnly\">Add Assignment</h2>\n" +
+    "    <h2 data-ng-if=\"!readOnly\">\n" +
+    "      <span data-ng-if=\"!multipleAssignments\">Add Assignment</span>\n" +
+    "      <span data-ng-if=\"multipleAssignments\">Add Assignments</span>\n" +
+    "    </h2>\n" +
     "    <h2 data-ng-if=\"readOnly\">View Assignment</h2>\n" +
     "    <form>\n" +
+    "      <div class=\"form-group\">\n" +
+    "        <div class=\"col-xs-12\">\n" +
+    "          <div class=\"radio-inline\">\n" +
+    "            <input type=\"radio\" id=\"singleAssignment\" data-ng-model=\"multipleAssignments\" data-ng-value=\"false\">\n" +
+    "            <label for=\"singleAssignment\">Single</label>\n" +
+    "          </div>\n" +
+    "          <div class=\"radio-inline\">\n" +
+    "            <input type=\"radio\" id=\"multipleAssignments\" data-ng-model=\"multipleAssignments\" data-ng-value=\"true\">\n" +
+    "            <label for=\"multipleAssignments\">Multiple</label>\n" +
+    "          </div>\n" +
+    "        </div>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <div class=\"form-group\" data-ng-if=\"multipleAssignments\">\n" +
+    "        <label for=\"howManyAssignments\">How many assignments?</label>\n" +
+    "        <input id=\"howManyAssignments\" class=\"form-control\" type=\"text\">\n" +
+    "      </div>\n" +
+    "\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"name\">Name</label>\n" +
     "        <input id=\"name\" class=\"form-control\" type=\"text\" data-ng-if=\"!readOnly\">\n" +
@@ -1301,9 +1331,13 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "        <p data-ng-if=\"readOnly\">Lorem ipsum dolor sitmet, conceptuir elit ascit.</p>\n" +
     "      </div>\n" +
     "      <button type=\"button\" class=\"btn btn-primary\" data-ng-if=\"!readOnly\" data-ng-click=\"saveAssignment()\">Add to Gradebook</button>\n" +
+    "      <button type=\"button\" class=\"btn btn-primary\" data-ng-if=\"!readOnly\" data-ng-click=\"cancel()\">Cancel</button>\n" +
     "      <button type=\"button\" class=\"btn btn-primary\" data-ng-if=\"readOnly\" data-ng-click=\"editAssignment()\">Edit Assignment</button>\n" +
     "    </form>\n" +
     "  </div>\n" +
+    "\n" +
+    "\n" +
+    "\n" +
     "  <div class=\"col-xs-3 right-settings\" data-ng-class=\"{'hidden':!filtersVisible}\">\n" +
     "    <h2>Filters</h2>\n" +
     "\n" +
