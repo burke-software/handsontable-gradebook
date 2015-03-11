@@ -56,7 +56,7 @@ angular.module('gradeBookApp.controllers')
       $scope.marketingPeriodSet = [];
 
       $scope.saveAssignment = function () {
-        assignmentFactory.save($scope.newAssignment).$promise.then(
+        assignmentFactory.create($scope.newAssignment).$promise.then(
           function (result) {
             console.log(result);
             hideRightColumn();

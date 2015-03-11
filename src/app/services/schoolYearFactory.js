@@ -10,7 +10,9 @@ angular.module('gradeBookApp.services')
           schoolYearId: '@schoolYearId'
         },
         {
-
+          get: {
+            isArray: true
+          },
           create: {
             method: 'POST'
           },

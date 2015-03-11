@@ -156,7 +156,7 @@ angular.module('gradeBookApp.controllers')
       $scope.marketingPeriodSet = [];
 
       $scope.saveAssignment = function () {
-        assignmentFactory.save($scope.newAssignment).$promise.then(
+        assignmentFactory.create($scope.newAssignment).$promise.then(
           function (result) {
             console.log(result);
             hideRightColumn();
@@ -659,7 +659,6 @@ angular.module('gradeBookApp.services')
           assignmentId: '@assignmentId'
         },
         {
-          
           create: {
             method: 'POST'
           },
@@ -1074,7 +1073,9 @@ angular.module('gradeBookApp.services')
           schoolYearId: '@schoolYearId'
         },
         {
-
+          get: {
+            isArray: true
+          },
           create: {
             method: 'POST'
           },
