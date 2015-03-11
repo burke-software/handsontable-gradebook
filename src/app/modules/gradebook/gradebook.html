@@ -117,12 +117,12 @@
       </div>
       <div class="form-group">
         <label for="date">Date</label>
-        <input id="date" class="form-control" type="text"  data-ng-if="!readOnly" data-ng-model="newAssignment.date">
+        <input id="date" class="form-control" type="date"  data-ng-if="!readOnly" data-ng-model="newAssignment.date">
         <p data-ng-if="readOnly">1/1/15</p>
       </div>
       <div class="form-group">
         <label for="maxPoints">Max Points</label>
-        <input id="maxPoints" class="form-control" type="text" data-ng-if="!readOnly" data-ng-model="newAssignment.points_possible">
+        <input id="maxPoints" class="form-control" type="number" data-ng-if="!readOnly" data-ng-model="newAssignment.points_possible">
         <p data-ng-if="readOnly">75</p>
       </div>
       <div class="form-group">
@@ -137,8 +137,7 @@
       </div>
       <div class="form-group">
         <label for="markingPeriod">Marking Period</label>
-        <select id="markingPeriod" class="form-control" data-ng-if="!readOnly" data-ng-model="newAssignment.marking_period" data-ng-options="period.id as period.name for period in marketingPeriodSet">
-
+        <select id="markingPeriod" class="form-control" data-ng-if="!readOnly" data-ng-model="newAssignment.marking_period" data-ng-options="period.id as period.name for period in markingPeriodSet">
         </select>
         <p data-ng-if="readOnly">MAth101: Group A</p>
       </div>

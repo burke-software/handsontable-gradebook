@@ -5,7 +5,7 @@ angular.module('gradeBookApp.services')
     'appConfig',
     '$resource',
     function (appConfig, $resource) {
-      return $resource(appConfig.apiUrl + '/assignments/:assignmentId/ ',
+      return $resource(appConfig.apiUrl + 'assignments/:assignmentId/ ',
         {
           assignmentId: '@assignmentId'
         },

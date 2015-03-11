@@ -129,7 +129,7 @@ angular.module('gradeBookApp.controllers')
           function (result){
             for (var i = 0, len = result.length; i < len; i++) {
               if (result[i].active_year){
-                $scope.marketingPeriodSet = result[i].markingperiod_set;
+                $scope.markingPeriodSet = result[i].markingperiod_set;
                 break;
               }
             }
@@ -153,7 +153,7 @@ angular.module('gradeBookApp.controllers')
 
       $scope.newAssignment = {};
 
-      $scope.marketingPeriodSet = [];
+      $scope.markingPeriodSet = [];
 
       $scope.saveAssignment = function () {
         assignmentFactory.create($scope.newAssignment).$promise.then(
@@ -654,7 +654,7 @@ angular.module('gradeBookApp.services')
     'appConfig',
     '$resource',
     function (appConfig, $resource) {
-      return $resource(appConfig.apiUrl + '/assignments/:assignmentId/ ',
+      return $resource(appConfig.apiUrl + 'assignments/:assignmentId/ ',
         {
           assignmentId: '@assignmentId'
         },
@@ -1348,12 +1348,12 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"date\">Date</label>\n" +
-    "        <input id=\"date\" class=\"form-control\" type=\"text\"  data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.date\">\n" +
+    "        <input id=\"date\" class=\"form-control\" type=\"date\"  data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.date\">\n" +
     "        <p data-ng-if=\"readOnly\">1/1/15</p>\n" +
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"maxPoints\">Max Points</label>\n" +
-    "        <input id=\"maxPoints\" class=\"form-control\" type=\"text\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.points_possible\">\n" +
+    "        <input id=\"maxPoints\" class=\"form-control\" type=\"number\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.points_possible\">\n" +
     "        <p data-ng-if=\"readOnly\">75</p>\n" +
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
@@ -1368,7 +1368,7 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"markingPeriod\">Marking Period</label>\n" +
-    "        <select id=\"markingPeriod\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.marking_period\" data-ng-options=\"period.id as period.name for period in marketingPeriodSet\">\n" +
+    "        <select id=\"markingPeriod\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.marking_period\" data-ng-options=\"period.id as period.name for period in markingPeriodSet\">\n" +
     "\n" +
     "        </select>\n" +
     "        <p data-ng-if=\"readOnly\">MAth101: Group A</p>\n" +
