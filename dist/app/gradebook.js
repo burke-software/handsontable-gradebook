@@ -1368,7 +1368,9 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +
     "        <label for=\"markingPeriod\">Marking Period</label>\n" +
-    "        <select id=\"markingPeriod\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.marking_period\"></select>\n" +
+    "        <select id=\"markingPeriod\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.marking_period\" data-ng-options=\"period.id as period.name for period in marketingPeriodSet\">\n" +
+    "\n" +
+    "        </select>\n" +
     "        <p data-ng-if=\"readOnly\">MAth101: Group A</p>\n" +
     "      </div>\n" +
     "      <div class=\"form-group\">\n" +

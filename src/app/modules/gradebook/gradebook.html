@@ -137,7 +137,9 @@
       </div>
       <div class="form-group">
         <label for="markingPeriod">Marking Period</label>
-        <select id="markingPeriod" class="form-control" data-ng-if="!readOnly" data-ng-model="newAssignment.marking_period"></select>
+        <select id="markingPeriod" class="form-control" data-ng-if="!readOnly" data-ng-model="newAssignment.marking_period" data-ng-options="period.id as period.name for period in marketingPeriodSet">
+
+        </select>
         <p data-ng-if="readOnly">MAth101: Group A</p>
       </div>
       <div class="form-group">
