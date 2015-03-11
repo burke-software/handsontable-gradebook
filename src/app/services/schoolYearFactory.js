@@ -5,7 +5,7 @@ angular.module('gradeBookApp.services')
     'appConfig',
     '$resource',
     function (appConfig, $resource) {
-      return $resource(appConfig.apiUrl + 'schoolYear/:schoolYearId/ ',
+      return $resource(appConfig.apiUrl + 'school_years/:schoolYearId/ ',
         {
           schoolYearId: '@schoolYearId'
         },
