@@ -124,12 +124,12 @@ angular.module('gradeBookApp.controllers')
         $scope.assignmentVisible = false;
       };
 
-      var getActiveMarketingPeriod = function () {
+      var getActiveMarkingPeriod = function () {
         schoolYearFactory.get().$promise.then(
           function (result){
             for (var i = 0, len = result.length; i < len; i++) {
               if (result[i].active_year){
-                $scope.marketingPeriodSet = result[i].marketingperiod_set;
+                $scope.marketingPeriodSet = result[i].markingperiod_set;
                 break;
               }
             }
@@ -214,7 +214,7 @@ angular.module('gradeBookApp.controllers')
 
 
       getCourses();
-      getActiveMarketingPeriod();
+      getActiveMarkingPeriod();
 
     }
   ]
