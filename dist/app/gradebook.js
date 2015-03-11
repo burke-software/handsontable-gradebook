@@ -1257,8 +1257,7 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "        columns=\"columns\"\n" +
     "        fixedColumnsLeft=\"2\"\n" +
     "        minSpareRows=\"1\"\n" +
-    "        minSpareCols=\"1\"\n" +
-    "        >\n" +
+    "        minSpareCols=\"1\">\n" +
     "      </hot-table>\n" +
     "\n" +
     "    </div>\n" +
