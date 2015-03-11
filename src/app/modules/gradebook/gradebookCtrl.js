@@ -6,9 +6,9 @@ angular.module('gradeBookApp.controllers')
     'courseFactory',
     'assignmentFactory',
     'schoolYearFactory',
-    'classSectionFactory',
+    'sectionFactory',
     '$log',
-    function ($scope, courseFactory, assignmentFactory, schoolYearFactory, classSectionFactory, $log) {
+    function ($scope, courseFactory, assignmentFactory, schoolYearFactory, sectionFactory, $log) {
 
       var getCourses = function () {
         courseFactory.get().$promise.then(
@@ -39,17 +39,22 @@ angular.module('gradeBookApp.controllers')
 
       $scope.getSection = function (sectionId) {
         $scope.activeSection = sectionId;
-        classSectionFactory.getBySection({sectionId: sectionId}).$promise.then(
+        sectionFactory.get({sectionId: sectionId}).$promise.then(
           function (result) {
+            $scope.sectionSelected = true;
             console.log(result);
-            $scope.users = [];
-            //prepareAssignments(result);
+            $scope.section = result;
           },
           function (error) {
             $log.error('singleSectionCtrl:getSection', error);
+            $scope.sectionSelected = false;
           }
         )
       };
+
+      $scope.sectionSelected = false;
+
+      $scope.section = {};
 
       $scope.newAssignment = {};
 

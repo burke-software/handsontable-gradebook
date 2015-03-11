@@ -106,9 +106,9 @@ angular.module('gradeBookApp.controllers')
     'courseFactory',
     'assignmentFactory',
     'schoolYearFactory',
-    'classSectionFactory',
+    'sectionFactory',
     '$log',
-    function ($scope, courseFactory, assignmentFactory, schoolYearFactory, classSectionFactory, $log) {
+    function ($scope, courseFactory, assignmentFactory, schoolYearFactory, sectionFactory, $log) {
 
       var getCourses = function () {
         courseFactory.get().$promise.then(
@@ -139,17 +139,22 @@ angular.module('gradeBookApp.controllers')
 
       $scope.getSection = function (sectionId) {
         $scope.activeSection = sectionId;
-        classSectionFactory.getBySection({sectionId: sectionId}).$promise.then(
+        sectionFactory.get({sectionId: sectionId}).$promise.then(
           function (result) {
+            $scope.sectionSelected = true;
             console.log(result);
-            $scope.users = [];
-            //prepareAssignments(result);
+            $scope.section = result;
           },
           function (error) {
             $log.error('singleSectionCtrl:getSection', error);
+            $scope.sectionSelected = false;
           }
         )
       };
+
+      $scope.sectionSelected = false;
+
+      $scope.section = {};
 
       $scope.newAssignment = {};
 
@@ -1289,8 +1294,11 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "      </li>\n" +
     "    </ul>\n" +
     "  </div>\n" +
-    "  <div class=\"col-xs-9 col-sm-6\">\n" +
-    "    <h2>Math 101: Group A</h2>\n" +
+    "  <div class=\"col-xs-9 col-sm-6\" data-ng-if=\"sectionSelected\">\n" +
+    "    <h2>\n" +
+    "      {{section.course.fullname}}\n" +
+    "      {{section.name}}\n" +
+    "    </h2>\n" +
     "\n" +
     "    <button class=\"btn btn-primary visible-xs\" data-ng-click=\"showSearch()\">Show search</button>\n" +
     "    <button class=\"btn btn-primary\" data-ng-click=\"toggleAssignments(false)\"><i class=\"fa fa-plus\"></i>&nbsp;Add Assignment(s)</button>\n" +
@@ -1369,7 +1377,6 @@ angular.module("gradebook/gradebook.html", []).run(["$templateCache", function($
     "      <div class=\"form-group\">\n" +
     "        <label for=\"markingPeriod\">Marking Period</label>\n" +
     "        <select id=\"markingPeriod\" class=\"form-control\" data-ng-if=\"!readOnly\" data-ng-model=\"newAssignment.marking_period\" data-ng-options=\"period.id as period.name for period in markingPeriodSet\">\n" +
-    "\n" +
     "        </select>\n" +
     "        <p data-ng-if=\"readOnly\">MAth101: Group A</p>\n" +
     "      </div>\n" +

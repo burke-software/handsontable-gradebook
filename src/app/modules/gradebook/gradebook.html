@@ -58,8 +58,11 @@
       </li>
     </ul>
   </div>
-  <div class="col-xs-9 col-sm-6">
-    <h2>Math 101: Group A</h2>
+  <div class="col-xs-9 col-sm-6" data-ng-if="sectionSelected">
+    <h2>
+      {{section.course.fullname}}
+      {{section.name}}
+    </h2>
 
     <button class="btn btn-primary visible-xs" data-ng-click="showSearch()">Show search</button>
     <button class="btn btn-primary" data-ng-click="toggleAssignments(false)"><i class="fa fa-plus"></i>&nbsp;Add Assignment(s)</button>
