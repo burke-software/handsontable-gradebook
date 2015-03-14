@@ -28,7 +28,7 @@ module.exports = function (grunt) {
           },
           dest: 'tmp/commonDirectives.js',
           src: [
-            'src/app/modules/**/*.html'
+            'src/app/modules/gradebook/*.html'
           ]
         }
       },
@@ -54,18 +54,6 @@ module.exports = function (grunt) {
           files: [
             {
               expand: true,
-              cwd: 'src/fonts/',
-              src: ['**'],
-              dest: 'dist/fonts/'
-            },
-            {
-              expand: true,
-              cwd: 'src/img/',
-              src: ['**'],
-              dest: 'dist/img/'
-            },
-            {
-              expand: true,
               cwd: 'src/lib/',
               src: ['**'],
               dest: 'dist/lib/'
@@ -76,8 +64,7 @@ module.exports = function (grunt) {
 
       app: {
         all: [
-          'src/app/directives/**/*.js',
-          'src/app/modules/**/*.js',
+          'src/app/modules/gradebook/*.js',
           'src/app/services/*.js'
         ]
       },

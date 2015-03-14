@@ -22,6 +22,9 @@ angular.module('gradeBookApp.controllers')
         $scope.filtersVisible = false;
         $scope.settingsVisible = false;
         $scope.assignmentVisible = false;
+        $scope.notificationVisible = false;
+        $scope.colorGuideVisible = false;
+        $scope.notificationType = null;
       };
 
       var getActiveMarkingPeriod = function () {
@@ -69,10 +72,13 @@ angular.module('gradeBookApp.controllers')
         )
       };
 
+      $scope.notificationType = null;
       $scope.filtersVisible = false;
       $scope.settingsVisible = false;
       $scope.assignmentVisible = false;
       $scope.multipleAssignments = false;
+      $scope.notificationVisible = false;
+      $scope.colorGuideVisible = false;
 
 
       $scope.search = {
@@ -81,6 +87,10 @@ angular.module('gradeBookApp.controllers')
       };
 
       $scope.activeSection = null;
+
+      $scope.settings = {};
+
+      $scope.settings.colorHeaders = {};
 
       $scope.setSearchRange = function (value) {
         $scope.search.where = value;
@@ -116,6 +126,16 @@ angular.module('gradeBookApp.controllers')
         $scope.assignmentVisible = true;
       };
 
+      $scope.showIconsGuide = function () {
+        hideRightColumn();
+        $scope.colorGuideVisible = true;
+      };
+
+      $scope.showNotificationDescription = function (notificationType) {
+        hideRightColumn();
+        $scope.notificationType = notificationType;
+        $scope.notificationVisible = true;
+      };
 
 
       getCourses();

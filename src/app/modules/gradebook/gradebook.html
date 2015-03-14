@@ -1,4 +1,5 @@
 <div id="gradebook">
+
   <div class="col-sm-3 hidden-xs left-filter">
 
     <h2>Gradebook</h2>
@@ -58,20 +59,24 @@
       </li>
     </ul>
   </div>
-  <div class="col-xs-9 col-sm-6" data-ng-if="sectionSelected">
-    <h2>
-      {{section.course.fullname}}
-      {{section.name}}
-    </h2>
 
-    <button class="btn btn-primary visible-xs" data-ng-click="showSearch()">Show search</button>
-    <button class="btn btn-primary" data-ng-click="toggleAssignments(false)"><i class="fa fa-plus"></i>&nbsp;Add Assignment(s)</button>
-    <button class="btn btn-primary" data-ng-click="toggleFilter()"><i class="fa fa-filter"></i>&nbsp;Filters</button>
-    <button class="btn btn-primary" data-ng-click="toggleSettings()"><i class="fa fa-sliders"></i>&nbsp;Settings</button>
-    <button class="btn btn-primary" data-ng-click="toggleAssignments(true)">ReadOnly test</button>
-    <span>Click on an assignment to view and edit details</span>
+  <div class="col-sm-9 col-sm-offset-3">
+    <h2>Math 101: Group A</h2>
 
-    <div style="overflow: auto; padding-bottom: 20px;">
+    <div class="col-xs-12">
+      <div class="pull-left">
+        <button class="btn btn-primary visible-xs" data-ng-click="showSearch()">Show search</button>
+        <button class="btn btn-primary" data-ng-click="toggleAssignments(false)"><i class="fa fa-plus"></i>&nbsp;Add Assignment(s)</button>
+        <button class="btn btn-primary" data-ng-click="toggleFilter()"><i class="fa fa-filter"></i>&nbsp;Filters</button>
+        <button class="btn btn-primary" data-ng-click="toggleSettings()"><i class="fa fa-sliders"></i>&nbsp;Settings</button>
+        <!--<button class="btn btn-primary" data-ng-click="toggleAssignments(true)">ReadOnly test</button>-->
+      </div>
+      <div class="pull-left" style="padding-left: 15px">
+        <p style="margin-bottom: -3px; margin-top:-1px">Click on an assignment to view and edit details</p>
+        <a data-ng-click="showIconsGuide()">What do the icons and colors in the cells mean?</a>
+      </div>
+    </div>
+    <div class="col-xs-12" style="overflow: auto; padding-bottom: 20px;">
 
       <hot-table
         afterChange="afterChange" ,
@@ -87,7 +92,6 @@
     </div>
   </div>
 
-
   <div class="col-xs-3 right-settings"  data-ng-class="{'hidden':!assignmentVisible}">
     <h2 data-ng-if="!readOnly">
       <span data-ng-if="!multipleAssignments">Add Assignment</span>
@@ -95,16 +99,10 @@
     </h2>
     <h2 data-ng-if="readOnly">View Assignment</h2>
     <form>
-      <div class="form-group">
-        <div class="col-xs-12">
-          <div class="radio-inline">
-            <input type="radio" id="singleAssignment" data-ng-model="multipleAssignments" data-ng-value="false">
-            <label for="singleAssignment">Single</label>
-          </div>
-          <div class="radio-inline">
-            <input type="radio" id="multipleAssignments" data-ng-model="multipleAssignments" data-ng-value="true">
-            <label for="multipleAssignments">Multiple</label>
-          </div>
+      <div class="form-group" data-ng-init="multipleAssignments = false">
+        <div class="col-xs-12 two-states">
+          <button class="col-xs-6 btn btn-default" data-ng-class="{'btn-primary': multipleAssignments == false}" data-ng-click="multipleAssignments = false">Single</button>
+          <button class="col-xs-6 btn btn-default" data-ng-class="{'btn-primary': multipleAssignments == true}" data-ng-click="multipleAssignments = true">Multiple</button>
         </div>
       </div>
 
@@ -160,8 +158,6 @@
     </form>
   </div>
 
-
-
   <div class="col-xs-3 right-settings" data-ng-class="{'hidden':!filtersVisible}">
     <h2>Filters</h2>
 
@@ -203,6 +199,7 @@
         </div>
       </div>
       <button type="submit" class="btn btn-primary">Filter by Selected Options</button>
+      <button class="btn btn-primary" data-ng-click="cancel()">Close</button>
     </form>
 
 
@@ -212,56 +209,238 @@
 
   <div class="col-xs-3 right-settings" data-ng-class="{'hidden':!settingsVisible}">
     <h2>Settings</h2>
-    <div class="form-group">
+
+    <div class="form-group clearfix" data-ng-init="settings.position = 'left'">
       <label>Final Grades Position</label>
-      <div class="col-xs-12">
-        <div class="radio-inline">
-          <input type="radio" id="leftPosition">
-          <label for="leftPosition">Left</label>
-        </div>
-        <div class="radio-inline">
-          <input type="radio" id="rightPosition">
-          <label for="rightPosition">Right</label>
-        </div>
+      <div class="col-xs-12 two-states">
+        <button class="col-xs-6 btn btn-default" data-ng-class="{'btn-primary': settings.position == 'left'}" data-ng-click="settings.position = 'left'">Left</button>
+        <button class="col-xs-6 btn btn-default" data-ng-class="{'btn-primary': settings.position == 'right'}" data-ng-click="settings.position = 'right'">Right</button>
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Assignment Listed</label>
+    <div class="form-group clearfix" data-ng-init="settings.sort = 'newest'">
+      <label>Sort Entries</label>
+
       <div class="col-xs-12">
-        <div class="radio-inline">
-          <input type="radio" id="oldestFirst">
-          <label for="oldestFirst">Oldest First</label>
+
+        <div class="radio">
+          <label>
+            <input type="radio" value="1" name="optionsRadios">
+            Date
+          </label>
         </div>
-        <div class="radio-inline">
-          <input type="radio" id="newestFirst">
-          <label for="newestFirst">Newest First</label>
+
+        <div class="radio">
+          <label>
+            <input type="radio" value="2" name="optionsRadios">
+            Name
+          </label>
         </div>
+
+        <div class="radio">
+          <label>
+            <input type="radio" value="3" name="optionsRadios">
+            Category
+          </label>
+        </div>
+
+        <div class="radio">
+          <label>
+            <input type="radio" value="4" name="optionsRadios">
+            Assignment Type
+          </label>
+        </div>
+
+        <div class="radio">
+          <label>
+            <input type="radio" value="5" name="optionsRadios">
+            Standard
+          </label>
+        </div>
+
+      </div>
+
+      <div class="col-xs-12 two-states">
+        <button class="col-xs-6 btn btn-default" data-ng-class="{'btn-primary': settings.sort == 'oldest'}" data-ng-click="settings.sort = 'oldest'">Oldest First</button>
+        <button class="col-xs-6 btn btn-default" data-ng-class="{'btn-primary': settings.sort == 'newest'}" data-ng-click="settings.sort = 'newest'">Newest First</button>
+      </div>
+
+
+
+    </div>
+
+    <div class="form-group clearfix">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="" name="largeScreen">
+          Always Show Right Sidebar on Large Screens
+        </label>
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Always Show Right Sidebar on Large Screens</label>
+    <div class="form-group clearfix">
+      <label>Colored headers</label>
       <div class="col-xs-12">
-        <div class="radio-inline">
-          <input type="radio" id="rightSidebarNo">
-          <label for="rightSidebarNo">No</label>
+
+        <div class="radio">
+          <label>
+            <input type="radio" value="category" data-ng-model="settings.colorHeaders.type" name="coloredHeaders">
+            By Category
+          </label>
         </div>
-        <div class="radio-inline">
-          <input type="radio" id="rightSidebarYes">
-          <label for="rightSidebarYes">Yes</label>
+
+        <div class="radio">
+          <label>
+            <input type="radio" value="name"  data-ng-model="settings.colorHeaders.type" name="coloredHeaders">
+            By Name
+          </label>
         </div>
+        <div class="col-xs-12" data-ng-if="settings.colorHeaders.type == 'name'">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" value="">
+              <span class="color-checker pink"></span>
+              <span class="pull-right">Precission and Accuracy</span>
+            </label>
+          </div>
+
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" value="">
+              <span class="color-checker green"></span>
+
+              <span class="pull-right">Standards</span>
+            </label>
+          </div>
+
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" value="">
+              <span class="color-checker orange"></span>
+
+              <span class="pull-right">Engagement</span>
+            </label>
+          </div>
+
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" value="" >
+              <span class="color-checker blue"></span>
+              <span class="pull-right">Assignment Competition</span>
+            </label>
+          </div>
+
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" value="" >
+              <span class="color-checker red"></span>
+              <span class="pull-right">Daily practice</span>
+            </label>
+          </div>
+
+        </div>
+
+
+        <div class="radio pull-left">
+          <label>
+            <input type="radio" value="assignmentType"  data-ng-model="settings.colorHeaders.type" name="coloredHeaders">
+            By Assignment Type
+          </label>
+        </div>
+
+
+      </div>
+
+    </div>
+
+    <div class="form-group clearfix">
+      <label>Show in header cells</label>
+      <div class="col-xs-12">
+
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" value="">
+            Category
+          </label>
+        </div>
+
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" value="">
+            Assignment Type
+          </label>
+        </div>
+
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" value="">
+            Name
+          </label>
+        </div>
+
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" value="" >
+            Standard
+          </label>
+        </div>
+
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group clearfix">
       <label>Grade input method</label>
       <p>Schooldriver Gradebook <a data-ng-click="">(change)</a></p>
     </div>
 
-    <div class="form-group">
+    <div class="form-group clearfix">
       <label>Display names</label>
       <p>First Last <a data-ng-click="">(change)</a></p>
     </div>
+
+    <button class="btn btn-primary" data-ng-click="cancel()">Close</button>
   </div>
+
+  <div class="col-xs-3 right-settings" data-ng-class="{'hidden': !colorGuideVisible}">
+    <h2>Icon/Color Guide</h2>
+
+    <dl class="dl-horizontal">
+
+      <dt data-ng-click="showNotificationDescription('saving')"><i class="fa fa-spinner"></i></dt>
+      <dd data-ng-click="showNotificationDescription('saving')">Data is saving</dd>
+
+      <dt data-ng-click="showNotificationDescription('general')"><i class="fa fa-flag"></i></dt>
+      <dd data-ng-click="showNotificationDescription('general')">General notification</dd>
+
+      <dt data-ng-click="showNotificationDescription('error')"><i class="fa fa-times-circle"></i></dt>
+      <dd data-ng-click="showNotificationDescription('error')">Error notification</dd>
+
+    </dl>
+
+    <i>Click the notification to get more information.</i>
+
+    <button class="btn btn-primary" data-ng-click="cancel()">Close</button>
+  </div>
+
+  <div class="col-xs-3 right-settings" data-ng-class="{'hidden': !notificationVisible}">
+    <div data-ng-if="notificationType === 'saving'">
+      <h2><i class="fa fa-spinner"></i> Data is saving</h2>
+      <p>sda dasd asdadadasd asdasdasd asdasdad asdada</p>
+    </div>
+
+    <div data-ng-if="notificationType === 'general'">
+      <h2><i class="fa fa-flag"></i> Possible input error</h2>
+      <p>Max points for this entry is 10, but you entered 100. This may be incorrec</p>
+    </div>
+
+    <div data-ng-if="notificationType === 'error'">
+      <h2><i class="fa fa-times-circle"></i> Lorem Ipsum</h2>
+      <p>sdad asdasdasdas dasdasdada dasdasdad asdasda</p>
+    </div>
+
+    <button class="btn btn-primary" data-ng-click="showIconsGuide()">Back</button>
+    <button class="btn btn-primary" data-ng-click="cancel()">Close</button>
+
+  </div>
+
 </div>
